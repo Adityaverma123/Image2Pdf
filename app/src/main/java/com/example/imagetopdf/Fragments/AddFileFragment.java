@@ -2,6 +2,7 @@ package com.example.imagetopdf.Fragments;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -46,7 +47,8 @@ import static android.app.Activity.RESULT_OK;
 
 public class AddFileFragment extends Fragment {
 
-   private Button addFileBtn;
+    private static final int CROP_PIC =3 ;
+    private Button addFileBtn;
     private Context context;
     private List<Uri>uris=new ArrayList<>();;
     private ImageAdapter adapter;
@@ -62,13 +64,20 @@ public class AddFileFragment extends Fragment {
         adapter=new ImageAdapter(context,uris);
         recyclerView=view.findViewById(R.id.recycler_view);
         LinearLayoutManager manager=new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false);
+        ImageView addImage=view.findViewById(R.id.addImage);
 
+        addImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openCamera();
+            }
+        });
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
         addFileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openCamera();
+                openSource();
             }
         });
         if(ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED) {
@@ -83,24 +92,29 @@ public class AddFileFragment extends Fragment {
     }
 
 
-    private void openCamera() {
-dialog.dismiss();
+    private void openSource() {
+//dialog.dismiss();
             CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).start(getContext(),this);
     }
-
+    private void openCamera()
+    {
+        Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent,1);
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE)
+        if(requestCode==CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE)
         {
+
             CropImage.ActivityResult result=CropImage.getActivityResult(data);
             if(resultCode==RESULT_OK)
             {
                 Uri imageUri=result.getUri();
                 Log.i("imageuri",imageUri.toString());
-               uris.add(imageUri);
-               adapter.notifyDataSetChanged();
+                uris.add(imageUri);
+                adapter.notifyDataSetChanged();
             }
             else if(resultCode==CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE)
             {
@@ -108,6 +122,52 @@ dialog.dismiss();
                 Toast.makeText(context,"Possible Error "+exception,Toast.LENGTH_SHORT).show();
 
             }
+
+        }
+        else if(requestCode==1 && data!=null)
+        {
+
+            Uri uri=data.getData();
+            performCrop(uri);
+
+        }
+        else if (requestCode == CROP_PIC) {
+            // get the returned data
+            Bundle extras = data.getExtras();
+            // get the cropped bitmap
+            Bitmap thePic = extras.getParcelable("data");
+
+
         }
     }
+    private void performCrop(Uri picUri) {
+        // take care of exceptions
+        try {
+            // call the standard crop action intent (the user device may not
+            // support it)
+            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+            // indicate image type and Uri
+            cropIntent.setDataAndType(picUri, "image/*");
+            // set crop properties
+            cropIntent.putExtra("crop", "true");
+            // indicate aspect of desired crop
+            cropIntent.putExtra("aspectX", 2);
+            cropIntent.putExtra("aspectY", 1);
+            // indicate output X and Y
+            cropIntent.putExtra("outputX", 256);
+            cropIntent.putExtra("outputY", 256);
+            // retrieve data on return
+            cropIntent.putExtra("return-data", true);
+            // start the activity - we handle returning in onActivityResult
+            startActivityForResult(cropIntent, CROP_PIC);
+        }
+        // respond to users whose devices do not support the crop action
+        catch (ActivityNotFoundException anfe) {
+            Toast toast = Toast
+                    .makeText(getContext(), "This device doesn't support the crop action!", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    }
+
+
 }
