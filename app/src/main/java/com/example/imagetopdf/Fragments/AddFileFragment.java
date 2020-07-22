@@ -92,15 +92,15 @@ dialog.dismiss();
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE)
+        if(requestCode==CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE)
         {
             CropImage.ActivityResult result=CropImage.getActivityResult(data);
             if(resultCode==RESULT_OK)
             {
                 Uri imageUri=result.getUri();
                 Log.i("imageuri",imageUri.toString());
-               uris.add(imageUri);
-               adapter.notifyDataSetChanged();
+                uris.add(imageUri);
+                adapter.notifyDataSetChanged();
             }
             else if(resultCode==CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE)
             {
