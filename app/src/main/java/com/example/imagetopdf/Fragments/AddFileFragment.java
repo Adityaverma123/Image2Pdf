@@ -54,6 +54,7 @@ public class AddFileFragment extends Fragment {
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
     private Dialog dialog;
+    private static final int PICK_IMAGE =1;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -81,7 +82,7 @@ public class AddFileFragment extends Fragment {
             }
         });
         if(ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, 1);
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
 
         }
         if(ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
@@ -99,7 +100,9 @@ public class AddFileFragment extends Fragment {
     private void openCamera()
     {
         Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent,1);
+//        intent.setType("image/*");
+
+        startActivityForResult(intent,PICK_IMAGE);
     }
 
     @Override
@@ -124,11 +127,12 @@ public class AddFileFragment extends Fragment {
             }
 
         }
-        else if(requestCode==1 && data!=null)
+        else if(requestCode==PICK_IMAGE && data!=null)
         {
 
             Uri uri=data.getData();
-            performCrop(uri);
+            launchImageCrop(uri);
+
 
         }
         else if (requestCode == CROP_PIC) {
@@ -140,33 +144,10 @@ public class AddFileFragment extends Fragment {
 
         }
     }
-    private void performCrop(Uri picUri) {
-        // take care of exceptions
-        try {
-            // call the standard crop action intent (the user device may not
-            // support it)
-            Intent cropIntent = new Intent("com.android.camera.action.CROP");
-            // indicate image type and Uri
-            cropIntent.setDataAndType(picUri, "image/*");
-            // set crop properties
-            cropIntent.putExtra("crop", "true");
-            // indicate aspect of desired crop
-            cropIntent.putExtra("aspectX", 2);
-            cropIntent.putExtra("aspectY", 1);
-            // indicate output X and Y
-            cropIntent.putExtra("outputX", 256);
-            cropIntent.putExtra("outputY", 256);
-            // retrieve data on return
-            cropIntent.putExtra("return-data", true);
-            // start the activity - we handle returning in onActivityResult
-            startActivityForResult(cropIntent, CROP_PIC);
-        }
-        // respond to users whose devices do not support the crop action
-        catch (ActivityNotFoundException anfe) {
-            Toast toast = Toast
-                    .makeText(getContext(), "This device doesn't support the crop action!", Toast.LENGTH_SHORT);
-            toast.show();
-        }
+
+    private void launchImageCrop(Uri uri) {
+        CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
+        .start(getContext(),this);
     }
 
 
