@@ -53,12 +53,13 @@ public class AddFileFragment extends Fragment {
 
    private Button addFileBtn;
     private Context context;
-    private List<Uri>uris=new ArrayList<>();;
+    private List<Bitmap>bitmaps=new ArrayList<>();;
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
     private Dialog dialog;
     private  Uri file;
     public static  final int PICK_IMAGE=1;
+    public static final int PIC_CROP=2;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -81,7 +82,7 @@ public class AddFileFragment extends Fragment {
             }
         });
 //        uris.clear();
-        adapter=new ImageAdapter(context,uris);
+        adapter=new ImageAdapter(context,bitmaps);
         recyclerView=view.findViewById(R.id.recycler_view);
         LinearLayoutManager manager=new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false);
 
@@ -115,13 +116,23 @@ public class AddFileFragment extends Fragment {
         if(requestCode==CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE)
         {
             CropImage.ActivityResult result=CropImage.getActivityResult(data);
-            if(resultCode==RESULT_OK)
-            {
-                Uri imageUri=result.getUri();
-                Log.i("imageuri",imageUri.toString());
-                uris.add(imageUri);
-                adapter.notifyDataSetChanged();
+            if(resultCode==RESULT_OK) {
+
+                try {
+                    Uri imageUri = result.getUri();
+
+                    InputStream input = getContext().getContentResolver().openInputStream(imageUri);
+                    Bitmap bitmap=BitmapFactory.decodeStream(input);
+                    Log.i("imageuri", imageUri.toString());
+                    bitmaps.add(bitmap);
+                    adapter.notifyDataSetChanged();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
             }
+
             else if(resultCode==CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE)
             {
                 Exception exception=result.getError();
@@ -135,12 +146,21 @@ public class AddFileFragment extends Fragment {
             startCrop(uri);
 
         }
+        else if(requestCode==PIC_CROP && resultCode==RESULT_OK)
+        {
+            Bundle extras = data.getExtras();
+//get the cropped bitmap
+            Bitmap thePic = extras.getParcelable("data");
+            bitmaps.add(thePic);
+        }
     }
     private void startCrop(Uri uri)
     {
-        String destinationFileName=UUID.randomUUID().toString()+".jpg";
-        UCrop uCrop=UCrop.of(uri,Uri.fromFile(new File(getContext().getCacheDir(),destinationFileName)));
-        uCrop.withMaxResultSize(450,450);
-        uCrop.start(getContext(),this);
+        CropImage.activity(uri)
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .setAspectRatio(1920,1080)
+                .start(getContext(),this)   ;
+
     }
+
 }

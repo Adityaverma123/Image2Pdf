@@ -19,11 +19,11 @@ import java.util.List;
 
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
     Context context;
-    List<Uri>uri;
-    public ImageAdapter(Context context,List<Uri>uri)
+    List<Bitmap>bitmaps;
+    public ImageAdapter(Context context,List<Bitmap>bitmaps)
     {
         this.context=context;
-        this.uri=uri;
+        this.bitmaps=bitmaps;
     }
     @NonNull
     @Override
@@ -35,13 +35,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.imageView.setImageURI(uri.get(position));
+        holder.imageView.setImageBitmap(bitmaps.get(position));
         holder.imageNo.setText("Image "+(position+1));
     }
 
     @Override
     public int getItemCount() {
-        return uri.size();
+        return bitmaps.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
