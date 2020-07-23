@@ -9,10 +9,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.imagetopdf.Adapters.ImageAdapter;
+import com.example.imagetopdf.BuildConfig;
 import com.example.imagetopdf.R;
 import com.google.android.material.snackbar.Snackbar;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -41,6 +45,7 @@ import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,25 +65,38 @@ public class AddFileFragment extends Fragment {
     private  Uri file;
     public static  final int PICK_IMAGE=1;
     public static final int PIC_CROP=2;
+    String currentPhotoPath = "";
+    Uri path;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.fragment_add_file, container, false);
         addFileBtn=view.findViewById(R.id.addFileBtn);
         context=getActivity();
-        if(ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
 
-        }
         if(ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},2);
+
+        }
+        if(ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
 
         }
         ImageView imageView=view.findViewById(R.id.addImage);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openCamera();
+                try {
+                    if(ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
+                        return;
+                    }
+                    else
+                    openCamera();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 //        uris.clear();
@@ -98,10 +116,31 @@ public class AddFileFragment extends Fragment {
         return view;
     }
 
-    private void openCamera() {
+    private void openCamera() throws IOException {
         Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File file=getImageFile();
 
-        startActivityForResult(intent,PICK_IMAGE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) // 2
+            path = FileProvider.getUriForFile(getActivity(), BuildConfig.APPLICATION_ID.concat(".provider"), file);
+        else
+            path = Uri.fromFile(file); // 3
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, path); // 4
+        startActivityForResult(intent, PICK_IMAGE);
+    }
+
+    private File getImageFile() throws IOException {
+
+        String imageFileName = "JPEG_" + System.currentTimeMillis() + "_";
+//        File storageDir = new File(
+//                Environment.getExternalStoragePublicDirectory(
+//                        Environment.DIRECTORY_DCIM
+//                ), "Camera"
+//        );
+        File file = File.createTempFile(
+                imageFileName, ".jpg", getContext().getCacheDir()
+        );
+        currentPhotoPath = "file:" + file.getAbsolutePath();
+        return file;
     }
 
 
@@ -142,25 +181,50 @@ public class AddFileFragment extends Fragment {
         }
         else if(requestCode==PICK_IMAGE && resultCode==RESULT_OK)
         {
-            Uri uri=data.getData();
-            startCrop(uri);
+//            Uri uri=data.getData();
+            startCrop(path);
 
         }
-        else if(requestCode==PIC_CROP && resultCode==RESULT_OK)
+        else if(requestCode==UCrop.REQUEST_CROP && resultCode==RESULT_OK)
         {
-            Bundle extras = data.getExtras();
-//get the cropped bitmap
-            Bitmap thePic = extras.getParcelable("data");
-            bitmaps.add(thePic);
+            Uri resultUri=UCrop.getOutput(data);
+            if(resultUri!=null) {
+                try {
+
+                    Bitmap bitmap = BitmapFactory.decodeStream(getContext().getContentResolver().openInputStream(resultUri));
+                    bitmaps.add(bitmap);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
+        else if (resultCode == UCrop.RESULT_ERROR) {
+            final Throwable cropError = UCrop.getError(data);
+    }
     }
     private void startCrop(Uri uri)
     {
-        CropImage.activity(uri)
-                .setGuidelines(CropImageView.Guidelines.ON)
-                .setAspectRatio(1920,1080)
-                .start(getContext(),this)   ;
+        CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
+                .setAspectRatio(1,1)
+                .start(context,this);
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode==PICK_IMAGE && grantResults[0]!=PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
+
+        }
+        else {
+            try {
+                openCamera();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
