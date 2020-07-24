@@ -185,23 +185,6 @@ public class AddFileFragment extends Fragment {
             startCrop(path);
 
         }
-        else if(requestCode==UCrop.REQUEST_CROP && resultCode==RESULT_OK)
-        {
-            Uri resultUri=UCrop.getOutput(data);
-            if(resultUri!=null) {
-                try {
-
-                    Bitmap bitmap = BitmapFactory.decodeStream(getContext().getContentResolver().openInputStream(resultUri));
-                    bitmaps.add(bitmap);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        else if (resultCode == UCrop.RESULT_ERROR) {
-            final Throwable cropError = UCrop.getError(data);
-    }
     }
     private void startCrop(Uri uri)
     {
