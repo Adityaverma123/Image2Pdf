@@ -197,24 +197,10 @@ public class AddFileFragment extends Fragment {
         } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
 //            Uri uri=data.getData();
             Uri uri=Uri.parse(currentPhotoPath);
+            cropUri.add(uri);
             startCrop(uri);
 
-        } else if (requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK) {
-            Uri resultUri = UCrop.getOutput(data);
-            if (resultUri != null) {
-                try {
-
-                    Bitmap bitmap = BitmapFactory.decodeStream(getContext().getContentResolver().openInputStream(resultUri));
-                    bitmaps.add(bitmap);
-
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        } else if (resultCode == UCrop.RESULT_ERROR) {
-            final Throwable cropError = UCrop.getError(data);
-        } else if (requestCode == OPENGALLERY && resultCode == RESULT_OK) {
+        }  else if (requestCode == OPENGALLERY && resultCode == RESULT_OK) {
             if (data != null) {
 
                 ClipData clipData = data.getClipData();
