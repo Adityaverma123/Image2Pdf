@@ -1,6 +1,7 @@
 package com.example.imagetopdf.Adapters;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -14,16 +15,22 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.imagetopdf.R;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.List;
 
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
     Context context;
     List<Bitmap>bitmaps;
-    public ImageAdapter(Context context,List<Bitmap>bitmaps)
+    List<Uri>cropUris;
+    Activity activity;
+    public ImageAdapter(Context context,List<Bitmap>bitmaps,List<Uri>cropUris,Activity activity)
     {
+        this.cropUris=cropUris;
         this.context=context;
         this.bitmaps=bitmaps;
+        this.activity=activity;
     }
     @NonNull
     @Override
@@ -34,10 +41,22 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         holder.imageView.setImageBitmap(bitmaps.get(position));
         holder.imageNo.setText("Image "+(position+1));
+        holder.imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startCrop(position);
+            }
+        });
 
+    }
+
+    private void startCrop(int position) {
+        CropImage.activity(cropUris.get(position))
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .start(activity);
     }
 
     @Override

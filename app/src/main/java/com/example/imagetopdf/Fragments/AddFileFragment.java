@@ -2,6 +2,7 @@ package com.example.imagetopdf.Fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.Context;
@@ -70,6 +71,8 @@ public class AddFileFragment extends Fragment {
     String currentPhotoPath = "";
     Uri path;
     ImageView addGallery;
+    List<Uri>cropUris;
+    Activity activity;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,7 +80,9 @@ public class AddFileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_add_file, container, false);
         addFileBtn = view.findViewById(R.id.addFileBtn);
         addGallery = view.findViewById(R.id.add_gallery);
-        context = getActivity();
+        context = getContext();
+        activity=getActivity();
+        cropUris=new ArrayList<>();
         addGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -111,7 +116,7 @@ public class AddFileFragment extends Fragment {
             }
         });
 //        uris.clear();
-        adapter = new ImageAdapter(context, bitmaps);
+        adapter = new ImageAdapter(context, bitmaps,cropUris,activity);
         recyclerView = view.findViewById(R.id.recycler_view);
         LinearLayoutManager manager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
 
@@ -198,6 +203,7 @@ public class AddFileFragment extends Fragment {
         } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
 //            Uri uri=data.getData();
             Uri uri = Uri.parse(currentPhotoPath);
+            cropUris.add(uri);
             startCrop(uri);
 
         } else if (requestCode == OPENGALLERY && resultCode == RESULT_OK) {
@@ -211,6 +217,7 @@ public class AddFileFragment extends Fragment {
                             Uri uri = clipData.getItemAt(i).getUri();
                             InputStream stream = getContext().getContentResolver().openInputStream(uri);
                             Bitmap bitmap = BitmapFactory.decodeStream(stream);
+                            cropUris.add(uri);
                             bitmaps.add(bitmap);
                             adapter.notifyDataSetChanged();
                         }
@@ -220,6 +227,7 @@ public class AddFileFragment extends Fragment {
                 } else {
                     try {
                         Uri uri = data.getData();
+                        cropUris.add(uri);
                         InputStream stream = getContext().getContentResolver().openInputStream(uri);
                         Bitmap bitmap = BitmapFactory.decodeStream(stream);
                         bitmaps.add(bitmap);
