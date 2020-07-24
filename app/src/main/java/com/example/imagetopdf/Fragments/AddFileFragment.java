@@ -60,7 +60,7 @@ public class AddFileFragment extends Fragment {
 
     private Button addFileBtn;
     private Context context;
-    private List<Bitmap> bitmaps = new ArrayList<>();
+    private List<Uri> uris = new ArrayList<>();
     ;
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
@@ -73,7 +73,7 @@ public class AddFileFragment extends Fragment {
     ImageView addGallery;
     List<Uri>cropUris;
     Activity activity;
-
+    public final int CROP_CAMERA=101;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -116,7 +116,7 @@ public class AddFileFragment extends Fragment {
             }
         });
 //        uris.clear();
-        adapter = new ImageAdapter(context, bitmaps,cropUris,activity);
+        adapter = new ImageAdapter(context, uris,activity);
         recyclerView = view.findViewById(R.id.recycler_view);
         LinearLayoutManager manager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
 
@@ -180,17 +180,17 @@ public class AddFileFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+        if (requestCode == CROP_CAMERA) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
 
                 try {
                     Uri imageUri = result.getUri();
-
+                    uris.add(imageUri);
                     InputStream input = getContext().getContentResolver().openInputStream(imageUri);
                     Bitmap bitmap = BitmapFactory.decodeStream(input);
                     Log.i("imageuri", imageUri.toString());
-                    bitmaps.add(bitmap);
+//                    bitmaps.add(bitmap);
                     adapter.notifyDataSetChanged();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -215,10 +215,11 @@ public class AddFileFragment extends Fragment {
 
                         for (int i = 0; i < clipData.getItemCount(); i++) {
                             Uri uri = clipData.getItemAt(i).getUri();
+                            uris.add(uri);
                             InputStream stream = getContext().getContentResolver().openInputStream(uri);
                             Bitmap bitmap = BitmapFactory.decodeStream(stream);
                             cropUris.add(uri);
-                            bitmaps.add(bitmap);
+//                            bitmaps.add(bitmap);
                             adapter.notifyDataSetChanged();
                         }
                     } catch (Exception e) {
@@ -228,9 +229,10 @@ public class AddFileFragment extends Fragment {
                     try {
                         Uri uri = data.getData();
                         cropUris.add(uri);
+                        uris.add(uri);
                         InputStream stream = getContext().getContentResolver().openInputStream(uri);
                         Bitmap bitmap = BitmapFactory.decodeStream(stream);
-                        bitmaps.add(bitmap);
+//                        bitmaps.add(bitmap);
                         adapter.notifyDataSetChanged();
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -238,12 +240,29 @@ public class AddFileFragment extends Fragment {
                 }
             }
         }
+        else if(requestCode==adapter.CHANGE_NO)
+        {
+                CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                if (resultCode == RESULT_OK) {
+
+                    Uri imageUri = result.getUri();
+                    Log.i("cropped uri",imageUri.toString());
+                    uris.set(adapter.getCropNo(),imageUri);
+                    adapter.notifyDataSetChanged();
+                    adapter.notifyItemChanged(adapter.getCropNo());
+                }
+                else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                    Exception exception = result.getError();
+                    Toast.makeText(context, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
+
+                }
+        }
     }
 
     private void startCrop(Uri uri) {
-        CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
-                .setAspectRatio(1, 1)
-                .start(context, this);
+      Intent intent=  CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
+                .getIntent(activity);
+      startActivityForResult(intent,CROP_CAMERA);
 
     }
 
