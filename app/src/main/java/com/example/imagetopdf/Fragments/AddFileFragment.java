@@ -2,6 +2,7 @@ package com.example.imagetopdf.Fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.ClipData;
 import android.content.Context;
@@ -58,7 +59,7 @@ import static android.app.Activity.RESULT_OK;
 public class AddFileFragment extends Fragment {
 
     private Button addFileBtn;
-    private Context context;
+    private Activity activity;
     private List<Bitmap> bitmaps = new ArrayList<>();
     ;
     private ImageAdapter adapter;
@@ -70,6 +71,7 @@ public class AddFileFragment extends Fragment {
     String currentPhotoPath = "";
     Uri path;
     ImageView addGallery;
+    List<Uri>cropUri=new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,12 +79,12 @@ public class AddFileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_add_file, container, false);
         addFileBtn = view.findViewById(R.id.addFileBtn);
         addGallery = view.findViewById(R.id.add_gallery);
-        context = getActivity();
+        activity = getActivity();
         addGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, OPENGALLERY);
                     return;
                 } else {
@@ -91,17 +93,14 @@ public class AddFileFragment extends Fragment {
 
             }
         });
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
 
-        }
         ImageView imageView = view.findViewById(R.id.addImage);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
-                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
+                    if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
                         return;
                     } else
                         openCamera();
@@ -111,9 +110,9 @@ public class AddFileFragment extends Fragment {
             }
         });
 //        uris.clear();
-        adapter = new ImageAdapter(context, bitmaps);
+        adapter = new ImageAdapter(activity, bitmaps,cropUri);
         recyclerView = view.findViewById(R.id.recycler_view);
-        LinearLayoutManager manager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+        LinearLayoutManager manager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
 
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
@@ -144,7 +143,7 @@ public class AddFileFragment extends Fragment {
         File file = getImageFile();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) // 2
-            path = FileProvider.getUriForFile(getActivity(), BuildConfig.APPLICATION_ID.concat(".provider"), file);
+            path = FileProvider.getUriForFile(activity, BuildConfig.APPLICATION_ID.concat(".provider"), file);
         else
             path = Uri.fromFile(file); // 3
         intent.putExtra(MediaStore.EXTRA_OUTPUT, path); // 4
@@ -169,7 +168,7 @@ public class AddFileFragment extends Fragment {
 
     private void openSource() {
 //dialog.dismiss();
-        CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).start(getContext(), this);
+        CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).start(activity);
     }
 
     @Override
@@ -192,12 +191,13 @@ public class AddFileFragment extends Fragment {
                 }
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception exception = result.getError();
-                Toast.makeText(context, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
 
             }
         } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
 //            Uri uri=data.getData();
-            startCrop(path);
+            Uri uri=Uri.parse(currentPhotoPath);
+            startCrop(uri);
 
         } else if (requestCode == UCrop.REQUEST_CROP && resultCode == RESULT_OK) {
             Uri resultUri = UCrop.getOutput(data);
@@ -207,6 +207,7 @@ public class AddFileFragment extends Fragment {
                     Bitmap bitmap = BitmapFactory.decodeStream(getContext().getContentResolver().openInputStream(resultUri));
                     bitmaps.add(bitmap);
 
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -215,15 +216,18 @@ public class AddFileFragment extends Fragment {
             final Throwable cropError = UCrop.getError(data);
         } else if (requestCode == OPENGALLERY && resultCode == RESULT_OK) {
             if (data != null) {
+
                 ClipData clipData = data.getClipData();
                 if (clipData != null) {
                     try {
 
 
                         for (int i = 0; i < clipData.getItemCount(); i++) {
+
                             Uri uri = clipData.getItemAt(i).getUri();
                             InputStream stream = getContext().getContentResolver().openInputStream(uri);
                             Bitmap bitmap = BitmapFactory.decodeStream(stream);
+                            cropUri.add(uri);
                             bitmaps.add(bitmap);
                             adapter.notifyDataSetChanged();
                         }
@@ -248,7 +252,7 @@ public class AddFileFragment extends Fragment {
     private void startCrop(Uri uri) {
         CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
                 .setAspectRatio(1, 1)
-                .start(context, this);
+                .start(activity);
 
     }
 
