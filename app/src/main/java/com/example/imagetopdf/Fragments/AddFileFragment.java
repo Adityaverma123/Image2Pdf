@@ -43,7 +43,10 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 import com.yalantis.ucrop.UCrop;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,7 +61,7 @@ public class AddFileFragment extends Fragment {
 
    private Button addFileBtn;
     private Context context;
-    private List<Bitmap>bitmaps=new ArrayList<>();;
+    private List<Uri>uris=new ArrayList<>();;
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
     private Dialog dialog;
@@ -100,7 +103,7 @@ public class AddFileFragment extends Fragment {
             }
         });
 //        uris.clear();
-        adapter=new ImageAdapter(context,bitmaps);
+        adapter=new ImageAdapter(context,uris);
         recyclerView=view.findViewById(R.id.recycler_view);
         LinearLayoutManager manager=new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false);
 
@@ -125,6 +128,8 @@ public class AddFileFragment extends Fragment {
         else
             path = Uri.fromFile(file); // 3
         intent.putExtra(MediaStore.EXTRA_OUTPUT, path); // 4
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
         startActivityForResult(intent, PICK_IMAGE);
     }
 
@@ -163,7 +168,7 @@ public class AddFileFragment extends Fragment {
                     InputStream input = getContext().getContentResolver().openInputStream(imageUri);
                     Bitmap bitmap=BitmapFactory.decodeStream(input);
                     Log.i("imageuri", imageUri.toString());
-                    bitmaps.add(bitmap);
+                    uris.add(imageUri);
                     adapter.notifyDataSetChanged();
                 }
                 catch (Exception e)
@@ -182,32 +187,44 @@ public class AddFileFragment extends Fragment {
         else if(requestCode==PICK_IMAGE && resultCode==RESULT_OK)
         {
 //            Uri uri=data.getData();
-            startCrop(path);
+//            startCrop(path);
+                Uri uri=Uri.parse(currentPhotoPath);
+            startCrop(uri,uri);
 
         }
         else if(requestCode==UCrop.REQUEST_CROP && resultCode==RESULT_OK)
         {
             Uri resultUri=UCrop.getOutput(data);
-            if(resultUri!=null) {
-                try {
-
-                    Bitmap bitmap = BitmapFactory.decodeStream(getContext().getContentResolver().openInputStream(resultUri));
-                    bitmaps.add(bitmap);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            Log.i("resultUri",resultUri.toString());
+           showImage(resultUri);
         }
         else if (resultCode == UCrop.RESULT_ERROR) {
             final Throwable cropError = UCrop.getError(data);
     }
     }
-    private void startCrop(Uri uri)
+
+    private void showImage(Uri resultUri) {
+        try {
+            File file= new File(resultUri.getPath());
+            InputStream inputStream = new FileInputStream(file);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            uris.add(resultUri);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        }
+
+    private void startCrop(Uri uri,Uri destination)
     {
-        CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
-                .setAspectRatio(1,1)
-                .start(context,this);
+//        CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
+//                .setAspectRatio(1,1)
+//                .start(context,this);
+        UCrop.of(uri,destination)
+                .withMaxResultSize(450,450)
+
+                .start(getContext(),this);
 
     }
 

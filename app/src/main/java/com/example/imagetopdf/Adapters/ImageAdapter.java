@@ -15,15 +15,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.imagetopdf.R;
 
+import java.net.URI;
 import java.util.List;
 
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
     Context context;
-    List<Bitmap>bitmaps;
-    public ImageAdapter(Context context,List<Bitmap>bitmaps)
+    List<Uri>uris;
+    public ImageAdapter(Context context,List<Uri>uris)
     {
         this.context=context;
-        this.bitmaps=bitmaps;
+        this.uris=uris;
     }
     @NonNull
     @Override
@@ -35,13 +36,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.imageView.setImageBitmap(bitmaps.get(position));
+        holder.imageView.setImageURI(uris.get(position));
         holder.imageNo.setText("Image "+(position+1));
     }
 
     @Override
     public int getItemCount() {
-        return bitmaps.size();
+        return uris.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
