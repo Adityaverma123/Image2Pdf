@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,9 +26,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -69,7 +73,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_file, container, false);
+        final View view = inflater.inflate(R.layout.fragment_add_file, container, false);
         addFileBtn = view.findViewById(R.id.addFileBtn);
         addGallery = view.findViewById(R.id.add_gallery);
         context = getContext();
@@ -89,10 +93,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
 
             }
         });
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
 
-        }
         ImageView imageView = view.findViewById(R.id.addImage);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,6 +118,22 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             }
         });
         recyclerView = view.findViewById(R.id.recycler_view);
+        ItemTouchHelper itemTouchHelper=new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP |ItemTouchHelper.DOWN |ItemTouchHelper.START|ItemTouchHelper.END,0) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                int fromPositon=viewHolder.getAdapterPosition();
+                int toPosition=target.getAdapterPosition();
+                Collections.swap(uris,fromPositon,toPosition);
+                adapter.notifyItemMoved(fromPositon,toPosition);
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+            }
+        });
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 //        LinearLayoutManager manager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
         GridLayoutManager manager=new GridLayoutManager(context,3);
         recyclerView.setLayoutManager(manager);
@@ -279,7 +296,11 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     @Override
     public void startCrop(Uri uri, int requestcode) {
         Intent intent=  CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
+                .setActivityTitle("Crop")
                 .getIntent(activity);
         startActivityForResult(intent,requestcode);
     }
+
+
+
 }
