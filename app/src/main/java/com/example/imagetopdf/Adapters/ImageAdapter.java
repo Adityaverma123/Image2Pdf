@@ -15,9 +15,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.imagetopdf.Fragments.AddFileFragment;
 import com.example.imagetopdf.R;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+
 
 import java.util.List;
 
@@ -25,6 +27,9 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     Context context;
     List<Uri>uris;
     public int cropNo;
+    List<Uri>cropUri;
+    OnChangePic onChangePic;
+    OnItemClickListener onItemClickListener;
     public final int CHANGE_NO=100;
 
     public int getCropNo() {
@@ -36,9 +41,11 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     }
 
     Activity activity;
-    public ImageAdapter(Context context,List<Uri>uris,Activity activity)
-    {
+    public ImageAdapter(Context context,List<Uri>uris,Activity activity,OnItemClickListener onItemClickListener)
 
+    {
+        this.onItemClickListener=onItemClickListener;
+        this.cropUri=cropUri;
         this.context=context;
         this.uris=uris;
         this.activity=activity;
@@ -58,21 +65,26 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startCrop(position);
+               onItemClickListener.onItemClicked(position,uris.get(position));
             }
         });
 
     }
-
     private void startCrop(int position) {
         setCropNo(position);
       Intent intent= CropImage.activity(uris.get(position))
                 .setGuidelines(CropImageView.Guidelines.ON)
                 .getIntent(activity);
-      activity.startActivityForResult(intent,CHANGE_NO);
+      intent.putExtra("requestcode",CHANGE_NO);
+     activity.startActivityForResult(intent,CHANGE_NO);
 
 
     }
+    public interface OnItemClickListener {
+        void onItemClicked(int position, Object object);
+    }
+
+
 
     @Override
     public int getItemCount() {
