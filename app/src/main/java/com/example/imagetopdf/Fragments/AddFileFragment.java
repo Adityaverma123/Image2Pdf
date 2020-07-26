@@ -38,6 +38,7 @@ import com.example.imagetopdf.Adapters.ImageAdapter;
 import com.example.imagetopdf.Adapters.OnChangePic;
 import com.example.imagetopdf.BuildConfig;
 import com.example.imagetopdf.R;
+import com.example.imagetopdf.Utils.Constants;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -60,16 +61,14 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     private RecyclerView recyclerView;
     private Dialog dialog;
     private Uri file;
-    public static final int PICK_IMAGE = 1;
-    public static final int OPENGALLERY = 2;
+
     String currentPhotoPath = "";
     Uri path;
     ImageView addGallery;
     List<Uri>cropUris;
     Activity activity;
     int positionOfCrop;
-    public final int CROP_CAMERA=100;
-    public final int CHANGE_PIC=101;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -85,7 +84,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             public void onClick(View view) {
 
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, OPENGALLERY);
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
                     return;
                 } else {
                     openGallery();
@@ -100,7 +99,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             public void onClick(View view) {
                 try {
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
                         return;
                     } else
                         openCamera();
@@ -113,7 +112,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         adapter = new ImageAdapter(context, uris,activity, new ImageAdapter.OnItemClickListener() {
             @Override
             public void onItemClicked(int position, Object object) {
-                startCrop(uris.get(position),CHANGE_PIC);
+                startCrop(uris.get(position),Constants.CHANGE_PIC);
                 positionOfCrop=position;
             }
         });
@@ -156,7 +155,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivityForResult(intent, OPENGALLERY);
+        startActivityForResult(intent, Constants.OPENGALLERY);
 
     }
 
@@ -169,7 +168,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         else
             path = Uri.fromFile(file); // 3
         intent.putExtra(MediaStore.EXTRA_OUTPUT, path); // 4
-        startActivityForResult(intent, PICK_IMAGE);
+        startActivityForResult(intent, Constants.PICK_IMAGE);
     }
 
     private File getImageFile() throws IOException {
@@ -196,7 +195,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CROP_CAMERA) {
+        if (requestCode == Constants.CROP_CAMERA) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
 
@@ -218,13 +217,13 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                 Toast.makeText(context, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
 
             }
-        } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
+        } else if (requestCode == Constants.PICK_IMAGE && resultCode == RESULT_OK) {
 //            Uri uri=data.getData();
             Uri uri = Uri.parse(currentPhotoPath);
 
-            startCrop(uri,CROP_CAMERA);
+            startCrop(uri,Constants.CROP_CAMERA);
 
-        } else if (requestCode == OPENGALLERY && resultCode == RESULT_OK) {
+        } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
             if (data != null) {
                 ClipData clipData = data.getClipData();
                 if (clipData != null) {
@@ -258,7 +257,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                 }
             }
         }
-        else if(requestCode==CHANGE_PIC)
+        else if(requestCode==Constants.CHANGE_PIC)
         {
                 CropImage.ActivityResult result = CropImage.getActivityResult(data);
                 if (resultCode == RESULT_OK) {
@@ -284,12 +283,12 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PICK_IMAGE && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, PICK_IMAGE);
+        if (requestCode == Constants.PICK_IMAGE && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
 
         }
-        if (requestCode == OPENGALLERY && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, OPENGALLERY);
+        if (requestCode == Constants.OPENGALLERY && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
         }
     }
 

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.imagetopdf.Fragments.AddFileFragment;
 import com.example.imagetopdf.R;
+import com.example.imagetopdf.Utils.Constants;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -30,7 +31,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     List<Uri>cropUri;
     OnChangePic onChangePic;
     OnItemClickListener onItemClickListener;
-    public final int CHANGE_NO=100;
+
 
     public int getCropNo() {
         return cropNo;
@@ -75,8 +76,8 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
       Intent intent= CropImage.activity(uris.get(position))
                 .setGuidelines(CropImageView.Guidelines.ON)
                 .getIntent(activity);
-      intent.putExtra("requestcode",CHANGE_NO);
-     activity.startActivityForResult(intent,CHANGE_NO);
+      intent.putExtra("requestcode",Constants.CHANGE_NO);
+     activity.startActivityForResult(intent,Constants.CHANGE_NO);
 
 
     }
