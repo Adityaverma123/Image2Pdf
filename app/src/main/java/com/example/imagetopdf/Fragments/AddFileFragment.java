@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -111,10 +112,13 @@ public class AddFileFragment extends Fragment implements OnChangePic {
 //        uris.clear();
         adapter = new ImageAdapter(context, uris,activity, new ImageAdapter.OnItemClickListener() {
             @Override
-            public void onItemClicked(int position, Object object) {
-                startCrop(uris.get(position),Constants.CHANGE_PIC);
-                positionOfCrop=position;
+            public void onItemClicked(int position, View v) {
+                if (v instanceof ImageView) {
+                    startCrop(uris.get(position), Constants.CHANGE_PIC);
+                    positionOfCrop = position;
+                }
             }
+
         });
         recyclerView = view.findViewById(R.id.recycler_view);
         ItemTouchHelper itemTouchHelper=new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP |ItemTouchHelper.DOWN |ItemTouchHelper.START|ItemTouchHelper.END,0) {
