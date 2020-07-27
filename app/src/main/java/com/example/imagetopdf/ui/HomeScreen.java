@@ -167,7 +167,6 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic {
                     String uri = uris.get(i).toString();
                     pdfs.add(uri);
                 }
-
                 //listener.onInputSend(ObjectSerializer.serialize((Serializable) pdfs));
             } catch (Exception e) {
                 e.printStackTrace();
