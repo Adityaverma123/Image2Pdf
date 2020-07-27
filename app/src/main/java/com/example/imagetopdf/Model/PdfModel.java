@@ -8,10 +8,20 @@ import java.io.Serializable;
 import java.util.List;
 
 public class PdfModel implements Parcelable {
-    PdfDocument pdfDocument;
+   String uri;
 
     protected PdfModel(Parcel in) {
+        uri = in.readString();
+    }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(uri);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<PdfModel> CREATOR = new Creator<PdfModel>() {
@@ -25,25 +35,4 @@ public class PdfModel implements Parcelable {
             return new PdfModel[size];
         }
     };
-
-    public PdfDocument getPdfDocument() {
-        return pdfDocument;
-    }
-
-    public void setPdfDocument(PdfDocument pdfDocument) {
-        this.pdfDocument = pdfDocument;
-    }
-
-    public PdfModel(PdfDocument pdfDocument) {
-        this.pdfDocument = pdfDocument;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-    }
 }

@@ -21,6 +21,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     TabLayout tabLayout;
     ViewPager viewPager;
+    AddFileFragment fileFragment;
+    ListFragments listFragments;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,9 +30,10 @@ public class MainActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tablayout);
         viewPager = findViewById(R.id.view_pager);
         ViewPagerAdapter adapter=new ViewPagerAdapter(getSupportFragmentManager());
-        AddFileFragment fileFragment=new AddFileFragment();
+         fileFragment=new AddFileFragment(MainActivity.this);
+         listFragments=new ListFragments(MainActivity.this);
         adapter.addFragment(fileFragment,"Add File");
-        adapter.addFragment(new ListFragments(),"Your Pdfs");
+        adapter.addFragment(listFragments,"Your Pdfs");
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(2);
         tabLayout.setupWithViewPager(viewPager);

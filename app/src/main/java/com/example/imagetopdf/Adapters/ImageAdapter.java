@@ -44,7 +44,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     }
 
     Activity activity;
-    public ImageAdapter(Context context,List<Uri>uris,Activity activity,OnItemClickListener onItemClickListener)
+    public ImageAdapter(Context context,List<Uri>uris,OnItemClickListener onItemClickListener)
 
     {
         this.onItemClickListener=onItemClickListener;
