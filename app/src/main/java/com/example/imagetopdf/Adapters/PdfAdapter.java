@@ -2,6 +2,7 @@ package com.example.imagetopdf.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.pdf.PdfDocument;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +20,11 @@ import java.util.List;
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     Context context;
     List<String >names;
+    List<PdfDocument>pdfDocuments;
 
-    public PdfAdapter(Context context, List<String>names)
+    public PdfAdapter(Context context, List<String>names,List<PdfDocument>pdfDocuments)
     {
+        this.pdfDocuments=pdfDocuments;
         this.context=context;
         this.names=names;
     }
@@ -41,6 +44,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             }
         });
 
+        holder.pdfName.setText(names.get(position));
     }
 
     @Override

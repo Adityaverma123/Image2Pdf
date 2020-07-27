@@ -7,10 +7,12 @@ import android.app.Dialog;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,12 +42,14 @@ import com.example.imagetopdf.Adapters.OnChangePic;
 import com.example.imagetopdf.BuildConfig;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
+import com.example.imagetopdf.Utils.ObjectSerializer;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,10 +70,15 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     String currentPhotoPath = "";
     Uri path;
     ImageView addGallery;
-    List<Uri>cropUris;
+    List<Uri> cropUris;
     Activity activity;
+    ImageView createPdf;
     int positionOfCrop;
+    List<PdfDocument>pdfs;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
 
+    @SuppressLint("CommitPrefEdits")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -77,17 +86,36 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         addFileBtn = view.findViewById(R.id.addFileBtn);
         addGallery = view.findViewById(R.id.add_gallery);
         context = getContext();
-        activity=getActivity();
+        activity = getActivity();
         uris = new ArrayList<>();
-        cropUris=new ArrayList<>();
+        cropUris = new ArrayList<>();
+        pdfs=new ArrayList<>();
+        createPdf = view.findViewById(R.id.createPdfBtn);
+        sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+        editor=sharedPreferences.edit();
+        createPdf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
+                    } else {
+                        createPdf();
+                    }
+                }
+
+        });
         addGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
-                    return;
-                } else {
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
+
+                    }
+
+                else {
+                    Log.i("Click","Gallery clicked");
                     openGallery();
                 }
 
@@ -99,10 +127,12 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             @Override
             public void onClick(View view) {
                 try {
-                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
-                        return;
-                    } else
+
+                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
+
+                        }
+                     else
                         openCamera();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -110,7 +140,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             }
         });
 //        uris.clear();
-        adapter = new ImageAdapter(context, uris,activity, new ImageAdapter.OnItemClickListener() {
+        adapter = new ImageAdapter(context, uris, activity, new ImageAdapter.OnItemClickListener() {
             @Override
             public void onItemClicked(int position, View v) {
                 if (v instanceof ImageView) {
@@ -121,13 +151,13 @@ public class AddFileFragment extends Fragment implements OnChangePic {
 
         });
         recyclerView = view.findViewById(R.id.recycler_view);
-        ItemTouchHelper itemTouchHelper=new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP |ItemTouchHelper.DOWN |ItemTouchHelper.START|ItemTouchHelper.END,0) {
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, 0) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                int fromPositon=viewHolder.getAdapterPosition();
-                int toPosition=target.getAdapterPosition();
-                Collections.swap(uris,fromPositon,toPosition);
-                adapter.notifyItemMoved(fromPositon,toPosition);
+                int fromPositon = viewHolder.getAdapterPosition();
+                int toPosition = target.getAdapterPosition();
+                Collections.swap(uris, fromPositon, toPosition);
+                adapter.notifyItemMoved(fromPositon, toPosition);
                 return false;
             }
 
@@ -138,7 +168,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         });
         itemTouchHelper.attachToRecyclerView(recyclerView);
 //        LinearLayoutManager manager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
-        GridLayoutManager manager=new GridLayoutManager(context,3);
+        GridLayoutManager manager = new GridLayoutManager(context, 3);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
         addFileBtn.setOnClickListener(new View.OnClickListener() {
@@ -149,6 +179,37 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         });
 
         return view;
+    }
+
+    private void createPdf() {
+        if(uris.size()>0)
+        {
+            try {
+
+
+                PdfDocument document = new PdfDocument();
+                for (int i = 0; i < uris.size(); i++) {
+                    Bitmap bitmap = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(i)));
+                    PdfDocument.PageInfo pageInfo=new PdfDocument.PageInfo.Builder(bitmap.getWidth(),bitmap.getHeight(),1).create();
+                    PdfDocument.Page page=document.startPage(pageInfo);
+                    document.finishPage(page);
+                }
+                document.close();
+                Log.i("pdf",document.toString());
+                pdfs.add(document);
+
+                editor.putString(Constants.LIST_KEY,ObjectSerializer.serialize((Serializable) pdfs)).apply();
+            }
+            catch (Exception e)
+            {
+                Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+                Log.i("error",e.getMessage());
+            }
+        }
+
+        else {
+            Toast.makeText(context,"Please add Images",Toast.LENGTH_SHORT).show();
+        }
     }
 
     @SuppressLint("IntentReset")
@@ -215,8 +276,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
-            else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception exception = result.getError();
                 Toast.makeText(context, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
 
@@ -225,7 +285,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
 //            Uri uri=data.getData();
             Uri uri = Uri.parse(currentPhotoPath);
 
-            startCrop(uri,Constants.CROP_CAMERA);
+            startCrop(uri, Constants.CROP_CAMERA);
 
         } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
             if (data != null) {
@@ -260,50 +320,53 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                     }
                 }
             }
-        }
-        else if(requestCode==Constants.CHANGE_PIC)
-        {
-                CropImage.ActivityResult result = CropImage.getActivityResult(data);
-                if (resultCode == RESULT_OK) {
+        } else if (requestCode == Constants.CHANGE_PIC) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
 
-                    Uri imageUri = result.getUri();
-                    cropUris.add(imageUri);
-                    Log.i("cropped uri",imageUri.toString());
-                    uris.set(positionOfCrop,imageUri);
-                    adapter.notifyItemChanged(positionOfCrop);
-                    adapter.notifyDataSetChanged();
+                Uri imageUri = result.getUri();
+                cropUris.add(imageUri);
+                Log.i("cropped uri", imageUri.toString());
+                uris.set(positionOfCrop, imageUri);
+                adapter.notifyItemChanged(positionOfCrop);
+                adapter.notifyDataSetChanged();
 
-                }
-                else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                    Exception exception = result.getError();
-                    Toast.makeText(context, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception exception = result.getError();
+                Toast.makeText(context, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
 
-                }
+            }
         }
     }
-
 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == Constants.PICK_IMAGE && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
-
+        if (requestCode == Constants.PICK_IMAGE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            {
+                try {
+                    openCamera();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-        if (requestCode == Constants.OPENGALLERY && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
+        if (requestCode == Constants.OPENGALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            openGallery();
+        }
+        if (requestCode == Constants.WRITE_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            createPdf();
         }
     }
 
     @Override
     public void startCrop(Uri uri, int requestcode) {
-        Intent intent=  CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
+        Intent intent = CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
                 .setActivityTitle("Crop")
                 .getIntent(activity);
-        startActivityForResult(intent,requestcode);
+        startActivityForResult(intent, requestcode);
     }
-
 
 
 }
