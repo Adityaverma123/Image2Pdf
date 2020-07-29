@@ -10,12 +10,19 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -32,19 +39,25 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.imagetopdf.Adapters.ImageAdapter;
 import com.example.imagetopdf.Adapters.OnChangePic;
 import com.example.imagetopdf.BuildConfig;
+import com.example.imagetopdf.Model.PdfModel;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
-public class HomeScreen extends AppCompatActivity implements OnChangePic {
+public class HomeScreen extends AppCompatActivity implements OnChangePic, Serializable {
     private Button addFileBtn;
     private List<Uri> uris;
     ;
@@ -59,7 +72,7 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic {
 
     ImageView createPdf;
     int positionOfCrop;
-    List<String>pdfs;
+    List<String> pdfs;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
 
@@ -72,9 +85,10 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic {
 
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
-        pdfs=new ArrayList<>();
+        pdfs = new ArrayList<>();
         createPdf = findViewById(R.id.createPdfBtn);
-
+        sharedPreferences=getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+        editor=sharedPreferences.edit();
         createPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -94,17 +108,15 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic {
                 if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
 
-                }
-
-                else {
-                    Log.i("Click","Gallery clicked");
+                } else {
+                    Log.i("Click", "Gallery clicked");
                     openGallery();
                 }
 
             }
         });
 
-        ImageView imageView =findViewById(R.id.addImage);
+        ImageView imageView = findViewById(R.id.addImage);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -113,8 +125,7 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic {
                     if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
 
-                    }
-                    else
+                    } else
                         openCamera();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -160,30 +171,74 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic {
             }
         });
     }
-    private void createPdf() {
+    private void saveToDirectory(PdfDocument document)  {
+                File filePath= Environment.getExternalStorageDirectory();
+        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+        if(!dir.exists())
+        {
+            dir.mkdir();
+        }
+        String filename=System.currentTimeMillis()+".pdf";
+        Log.i("HomePath",dir.toString()+filename.toString());
+        File file=new File(dir,filename);
+        try {
+
+            OutputStream outputStream=new FileOutputStream(file);
+            document.writeTo(outputStream);
+            Toast.makeText(getApplicationContext(),"Pdf saved!",Toast.LENGTH_SHORT).show();
+            outputStream.flush();
+
+            Intent intent=new Intent(this,PdfLists.class);
+            editor.putString(Constants.LIST_KEY,filename).apply();
+            editor.commit();
+            startActivity(intent);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
+    private void createPdf()  {
+        try {
         if (uris.size() > 0) {
-            try {
-                for (int i = 0; i < uris.size(); i++) {
-                    String uri = uris.get(i).toString();
-                    pdfs.add(uri);
+                PdfDocument document = new PdfDocument();
+                for (int i = 0; i < uris.size(); i++)
+                {
+                    Bitmap sample = BitmapFactory.decodeStream(this.getContentResolver().openInputStream(uris.get(i)));
+                    PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(sample.getWidth(), sample.getHeight(), 1).create();
+                    PdfDocument.Page page = document.startPage(pageInfo);
+                    page.getCanvas().drawBitmap(sample,0,0,null);
+                    //Paint paint=new Paint();
+
+                    document.finishPage(page);
                 }
-                //listener.onInputSend(ObjectSerializer.serialize((Serializable) pdfs));
-            } catch (Exception e) {
-                e.printStackTrace();
+            saveToDirectory(document);
+                document.close();
+
+                Log.i("pdf", document.toString());
+//            PdfModel model=new PdfModel(document);
+//            Intent intent=new Intent(this,PdfLists.class);
+//            intent.putExtra(Constants.LIST_KEY,model);
+//            startActivity(intent);
+        }
+        else {
+            Toast.makeText(this, "Please add Images", Toast.LENGTH_SHORT).show();
+        }
+        }
+        catch (Exception e) {
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.i("error", e.getMessage());
             }
 
-        }
 
-        else {
-            Toast.makeText(this,"Please add Images",Toast.LENGTH_SHORT).show();
-        }
     }
-    public interface FragmentListener{
+
+    public interface FragmentListener {
         void onInputSend(List<String> StringUris);
     }
-
-
-
 
 
     @SuppressLint("IntentReset")

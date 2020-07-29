@@ -1,30 +1,39 @@
 package com.example.imagetopdf.Adapters;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.imagetopdf.BuildConfig;
 import com.example.imagetopdf.R;
+import com.example.imagetopdf.Utils.Constants;
+import com.example.imagetopdf.ui.HomeScreen;
+import com.example.imagetopdf.ui.PdfOpener;
 
+import java.io.File;
 import java.util.List;
 
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     Context context;
     List<String >names;
-    List<PdfDocument>pdfDocuments;
-
-    public PdfAdapter(Context context, List<String>names,List<PdfDocument>pdfDocuments)
+    public PdfAdapter(Context context, List<String>names)
     {
-        this.pdfDocuments=pdfDocuments;
         this.context=context;
         this.names=names;
     }
@@ -36,20 +45,52 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
         holder.layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent=new Intent(Intent.ACTION_VIEW);
+                File file=getImageFile(position);
+                Uri path;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    path = FileProvider.getUriForFile(context, "com.example.imagetopdf.Utils.FileProvider", file);
+                else
+                    path = Uri.fromFile(file);
+                MimeTypeMap map = MimeTypeMap.getSingleton();
+                String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+                String type = map.getMimeTypeFromExtension(ext);
+                intent.setDataAndType(path,type);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                try
+                    {
+                        context.startActivity(intent);
+                    }
+                    catch(ActivityNotFoundException e)
+                    {
+                        Toast.makeText(context, "No Application available to view pdf", Toast.LENGTH_LONG).show();
+                    }
+                }
 
-            }
+
         });
 
         holder.pdfName.setText(names.get(position));
     }
 
+    private File getImageFile(int position) {
+        File filePath= Environment.getExternalStorageDirectory();
+        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+        String fileName=names.get(position);
+        File file=new File(dir,fileName);
+        return file;
+    }
+
+
+
     @Override
     public int getItemCount() {
-        return 0;
+        return names.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{

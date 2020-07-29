@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.imagetopdf">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -7,6 +8,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
+        android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -25,7 +27,15 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
+        <provider
+            android:name="com.example.imagetopdf.Utils.FileProvider"
+            android:authorities="com.example.imagetopdf.Utils.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/pdf_path" />
+        </provider>
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="fullSensor"
@@ -40,7 +50,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.HomeScreen" />
+        <activity android:name=".ui.HomeScreen"
+            tools:ignore="DuplicateActivity" />
+        <activity android:name=".ui.PdfOpener"/>
     </application>
 
 </manifest>

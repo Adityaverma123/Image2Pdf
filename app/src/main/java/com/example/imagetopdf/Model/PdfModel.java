@@ -7,32 +7,14 @@ import android.os.Parcelable;
 import java.io.Serializable;
 import java.util.List;
 
-public class PdfModel implements Parcelable {
-   String uri;
+public class PdfModel implements Serializable {
+  PdfDocument pdfDocument;
 
-    protected PdfModel(Parcel in) {
-        uri = in.readString();
+    public PdfDocument getPdfDocument() {
+        return pdfDocument;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(uri);
+    public PdfModel(PdfDocument pdfDocument) {
+        this.pdfDocument = pdfDocument;
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<PdfModel> CREATOR = new Creator<PdfModel>() {
-        @Override
-        public PdfModel createFromParcel(Parcel in) {
-            return new PdfModel(in);
-        }
-
-        @Override
-        public PdfModel[] newArray(int size) {
-            return new PdfModel[size];
-        }
-    };
 }

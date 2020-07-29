@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class ListFragments extends Fragment implements AddFileFragment.FragmentListener{
+public class ListFragments extends Fragment implements Serializable{
     RecyclerView recyclerView;
     List<PdfDocument> pdfLists;
     SharedPreferences sharedPreferences;
@@ -55,7 +55,7 @@ public class ListFragments extends Fragment implements AddFileFragment.FragmentL
         pdf=new ArrayList<>();
         documents=new ArrayList<>();
 
-        adapter=new PdfAdapter(context,names,pdfLists);
+        adapter=new PdfAdapter(context,names);
         LinearLayoutManager manager=new LinearLayoutManager(context);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
@@ -64,55 +64,12 @@ public class ListFragments extends Fragment implements AddFileFragment.FragmentL
     }
     private void createPdf(List<String> uris)
     {
-        try {
-
-
-            PdfDocument document = new PdfDocument();
-            for (int i = 0; i < uris.size(); i++) {
-                Bitmap bitmap = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(Uri.parse(uris.get(i))));
-                PdfDocument.PageInfo pageInfo=new PdfDocument.PageInfo.Builder(bitmap.getWidth(),bitmap.getHeight(),1).create();
-                PdfDocument.Page page=document.startPage(pageInfo);
-                document.finishPage(page);
-            }
-            document.close();
-            Log.i("pdf",document.toString());
-            documents.add(document);
-            if(documents!=null) {
-                for (int i = 0; i < documents.size(); i++) {
-                    String name=UUID.randomUUID().toString();
-                    names.add(name);
-                    adapter.notifyDataSetChanged();
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
-            Log.i("error",e.getMessage());
-        }
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        this.context=context;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.i("onPause","ON PAUSE");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.i("onResume","ON RESUME");
 
     }
 
-    @Override
-    public void onInputSend(List<String> StringUris) {
-        createPdf(StringUris);
-    }
+
+
+
+
+
 }
