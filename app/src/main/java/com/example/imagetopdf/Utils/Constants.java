@@ -10,5 +10,6 @@ public class Constants {
     public static final String SHARED_PREFS="shared_prefs";
     public static final String LIST_KEY="pdf_key";
     public static final String SEND_NAME="send_name";
+    public static final String SEND_POSITION="position";
 
 }

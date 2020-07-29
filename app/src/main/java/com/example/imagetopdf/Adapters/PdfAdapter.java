@@ -49,21 +49,11 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         holder.layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(Intent.ACTION_VIEW);
-                File file=getImageFile(position);
-                Uri path;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                    path = FileProvider.getUriForFile(context, "com.example.imagetopdf.Utils.FileProvider", file);
-                else
-                    path = Uri.fromFile(file);
-                MimeTypeMap map = MimeTypeMap.getSingleton();
-                String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
-                String type = map.getMimeTypeFromExtension(ext);
-                intent.setDataAndType(path,type);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Intent intent=new Intent(context,PdfOpener.class);
+
                 try
                     {
+                        intent.putExtra(Constants.SEND_NAME,names.get(position));
                         context.startActivity(intent);
                     }
                     catch(ActivityNotFoundException e)
@@ -78,13 +68,6 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         holder.pdfName.setText(names.get(position));
     }
 
-    private File getImageFile(int position) {
-        File filePath= Environment.getExternalStorageDirectory();
-        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
-        String fileName=names.get(position);
-        File file=new File(dir,fileName);
-        return file;
-    }
 
 
 
