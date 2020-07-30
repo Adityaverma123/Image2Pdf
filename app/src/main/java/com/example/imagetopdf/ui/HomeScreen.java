@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -63,7 +65,7 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
     ;
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
-
+    private ProgressBar progressBar;
 
     String currentPhotoPath = "";
     Uri path;
@@ -82,7 +84,7 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
         setContentView(R.layout.activity_home_screen);
         addFileBtn = findViewById(R.id.addFileBtn);
         addGallery = findViewById(R.id.add_gallery);
-
+        progressBar=findViewById(R.id.progress_bar);
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
@@ -96,7 +98,13 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                 if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
-                    createPdf();
+                    if(uris.size()>0) {
+                        CreatePdf createPdf = new CreatePdf();
+                        createPdf.execute(uris.size());
+                    }
+                    else {
+                        Toast.makeText(HomeScreen.this,"Please Add Images",Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
@@ -171,67 +179,10 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
             }
         });
     }
-    private void saveToDirectory(PdfDocument document)  {
-                File filePath= Environment.getExternalStorageDirectory();
-        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
-        if(!dir.exists())
-        {
-            dir.mkdir();
-        }
-        String filename=System.currentTimeMillis()+".pdf";
-        Log.i("HomePath",dir.toString()+filename.toString());
-        File file=new File(dir,filename);
-        try {
 
-            OutputStream outputStream=new FileOutputStream(file);
-            document.writeTo(outputStream);
-            Toast.makeText(getApplicationContext(),"Pdf saved!",Toast.LENGTH_SHORT).show();
-            outputStream.flush();
-
-            Intent intent=new Intent(this,PdfLists.class);
-            editor.putString(Constants.LIST_KEY,filename).apply();
-            editor.commit();
-            startActivity(intent);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(),e.getMessage(),Toast.LENGTH_SHORT).show();
-        }
-
-
-    }
 
     private void createPdf()  {
-        try {
-        if (uris.size() > 0) {
-                PdfDocument document = new PdfDocument();
-                for (int i = 0; i < uris.size(); i++)
-                {
-                    Bitmap sample = BitmapFactory.decodeStream(this.getContentResolver().openInputStream(uris.get(i)));
-                    PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(sample.getWidth(), sample.getHeight(), 1).create();
-                    PdfDocument.Page page = document.startPage(pageInfo);
-                    page.getCanvas().drawBitmap(sample,0,0,null);
-                    //Paint paint=new Paint();
 
-                    document.finishPage(page);
-                }
-            saveToDirectory(document);
-                document.close();
-
-                Log.i("pdf", document.toString());
-//            PdfModel model=new PdfModel(document);
-//            Intent intent=new Intent(this,PdfLists.class);
-//            intent.putExtra(Constants.LIST_KEY,model);
-//            startActivity(intent);
-        }
-        else {
-            Toast.makeText(this, "Please add Images", Toast.LENGTH_SHORT).show();
-        }
-        }
-        catch (Exception e) {
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.i("error", e.getMessage());
-            }
 
 
     }
@@ -395,5 +346,88 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                 .setActivityTitle("Crop")
                 .getIntent(this);
         startActivityForResult(intent, requestcode);
+    }
+    public  class CreatePdf extends AsyncTask<Integer,Integer,String>
+    {
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            progressBar.setVisibility(View.INVISIBLE);
+            progressBar.setMax(100);
+            if(s.equals("saved"))
+            {
+                Toast.makeText(HomeScreen.this,"Pdf saved!",Toast.LENGTH_SHORT).show();
+            }
+
+            else  {
+                Toast.makeText(HomeScreen.this,"Error: "+s,Toast.LENGTH_SHORT).show();
+
+            }
+        }
+
+        @Override
+        protected String doInBackground(Integer... integers) {
+                int size=integers[0];
+                    PdfDocument document = new PdfDocument();
+                    try {
+
+                    for (int i = 0; i < size; i++)
+                    {
+                        Bitmap sample = BitmapFactory.decodeStream(HomeScreen.this.getContentResolver().openInputStream(uris.get(i)));
+                        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(sample.getWidth(), sample.getHeight(), 1).create();
+                        PdfDocument.Page page = document.startPage(pageInfo);
+                        page.getCanvas().drawBitmap(sample,0,0,null);
+                        //Paint paint=new Paint();
+
+                        document.finishPage(page);
+                    }
+                    File filePath= Environment.getExternalStorageDirectory();
+                    File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+                    if(!dir.exists())
+                    {
+                        dir.mkdir();
+                    }
+                    String filename=System.currentTimeMillis()+".pdf";
+                    Log.i("HomePath",dir.toString()+filename.toString());
+                    File file=new File(dir,filename);
+                    OutputStream outputStream=new FileOutputStream(file);
+                    document.writeTo(outputStream);
+                    //Toast.makeText(getApplicationContext(),"Pdf saved!",Toast.LENGTH_SHORT).show();
+                    outputStream.flush();
+
+                    Intent intent=new Intent(HomeScreen.this,PdfLists.class);
+                    editor.putString(Constants.LIST_KEY,filename).apply();
+                    editor.commit();
+                    startActivity(intent);
+                    Log.i("pdf", document.toString());
+                    document.close();
+                    return "saved";
+            }
+            catch (Exception e) {
+                //Toast.makeText(HomeScreen.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.i("error", e.getMessage());
+                return e.getMessage();
+
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar.setVisibility(View.VISIBLE);
+        }
+        //            PdfModel model=new PdfModel(document);
+//            Intent intent=new Intent(this,PdfLists.class);
+//            intent.putExtra(Constants.LIST_KEY,model);
+//            startActivity(intent);
+
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            progressBar.setProgress(values[0]);
+        }
+
     }
 }
