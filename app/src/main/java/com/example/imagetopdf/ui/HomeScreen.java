@@ -318,24 +318,33 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
 
         } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
             if (data != null) {
-                ClipData clipData = data.getClipData();
+                final ClipData clipData = data.getClipData();
+                Thread thread=new Thread();
                 if (clipData != null) {
-                    try {
+                    final Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+
+                            try {
 
 
-                        for (int i = 0; i < clipData.getItemCount(); i++) {
-                            Uri uri = clipData.getItemAt(i).getUri();
-                            uris.add(uri);
-                            InputStream stream = this.getContentResolver().openInputStream(uri);
-                            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-                            cropUris.add(uri);
+                                for (int i = 0; i < clipData.getItemCount(); i++) {
+                                    Uri uri = clipData.getItemAt(i).getUri();
+                                    uris.add(uri);
+                                    InputStream stream = HomeScreen.this.getContentResolver().openInputStream(uri);
+                                    Bitmap bitmap = BitmapFactory.decodeStream(stream);
+                                    cropUris.add(uri);
 //                            bitmaps.add(bitmap);
-                            adapter.notifyDataSetChanged();
+                                    adapter.notifyDataSetChanged();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
+
+                    };
+                }
+                 else {
                     try {
                         Uri uri = data.getData();
                         cropUris.add(uri);
