@@ -173,7 +173,7 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
         });
     }
     private void saveToDirectory(PdfDocument document)  {
-                File filePath= Environment.getExternalStorageDirectory();
+                File filePath= this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
         if(!dir.exists())
         {

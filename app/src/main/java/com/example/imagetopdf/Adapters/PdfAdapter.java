@@ -79,7 +79,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
 
     private File getImageFile(int position) {
-        File filePath= Environment.getExternalStorageDirectory();
+        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
         String fileName=names.get(position);
         File file=new File(dir,fileName);
