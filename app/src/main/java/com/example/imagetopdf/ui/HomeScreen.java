@@ -3,6 +3,7 @@ package com.example.imagetopdf.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -76,14 +78,14 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
     List<String> pdfs;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
-
+    ProgressDialog progressDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
         addFileBtn = findViewById(R.id.addFileBtn);
         addGallery = findViewById(R.id.add_gallery);
-
+        progressDialog=new ProgressDialog(this);
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
@@ -97,7 +99,13 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                 if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
-                    createPdf();
+                    if(uris.size()>0) {
+                        showDialog();
+                        createPdf();
+                    }
+                    else {
+                        Toast.makeText(HomeScreen.this,"Please Add Images",Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
@@ -173,6 +181,7 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
         });
     }
     private void saveToDirectory(PdfDocument document)  {
+           dismissDialog();
                 File filePath= this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
         if(!dir.exists())
@@ -201,10 +210,19 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
 
 
     }
+    private void showDialog()
+    {
+        progressDialog.show();
+        progressDialog.setMessage("Please wait...");
+    }
+    private void dismissDialog()
+    {
+        progressDialog.dismiss();
+    }
 
     private void createPdf()  {
+
         try {
-        if (uris.size() > 0) {
                 PdfDocument document = new PdfDocument();
                 for (int i = 0; i < uris.size(); i++)
                 {
@@ -237,11 +255,8 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
 //            intent.putExtra(Constants.LIST_KEY,model);
 //            startActivity(intent);
         }
-        else {
-            Toast.makeText(this, "Please add Images", Toast.LENGTH_SHORT).show();
-        }
-        }
         catch (Exception e) {
+            dismissDialog();
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.i("error", e.getMessage());
             }
