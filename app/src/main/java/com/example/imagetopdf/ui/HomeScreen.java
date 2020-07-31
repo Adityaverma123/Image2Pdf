@@ -247,7 +247,6 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
         intent.setType("image/*");
         String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent, Constants.OPENGALLERY);
 
@@ -318,37 +317,15 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
 
         } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
             if (data != null) {
-                ClipData clipData = data.getClipData();
-                if (clipData != null) {
-                    try {
 
-
-                        for (int i = 0; i < clipData.getItemCount(); i++) {
-                            Uri uri = clipData.getItemAt(i).getUri();
-                            uris.add(uri);
-                            InputStream stream = this.getContentResolver().openInputStream(uri);
-                            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-                            cropUris.add(uri);
-//                            bitmaps.add(bitmap);
-                            adapter.notifyDataSetChanged();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
                     try {
                         Uri uri = data.getData();
-                        cropUris.add(uri);
-                        uris.add(uri);
-                        InputStream stream = this.getContentResolver().openInputStream(uri);
-                        Bitmap bitmap = BitmapFactory.decodeStream(stream);
-//                        bitmaps.add(bitmap);
-                        adapter.notifyDataSetChanged();
+                        startCrop(uri,Constants.CROP_CAMERA);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-            }
+
         } else if (requestCode == Constants.CHANGE_PIC) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
