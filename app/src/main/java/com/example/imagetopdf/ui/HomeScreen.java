@@ -21,6 +21,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -207,10 +208,22 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                 PdfDocument document = new PdfDocument();
                 for (int i = 0; i < uris.size(); i++)
                 {
+                    WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+                    Display display = wm.getDefaultDisplay();
+                    DisplayMetrics displaymetrics = new DisplayMetrics();
+                    this.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                    float height = displaymetrics.heightPixels ;
+                    float width = displaymetrics.widthPixels ;
+                    int convertHeight = (int) height, convertWidth = (int) width;
                     Bitmap sample = BitmapFactory.decodeStream(this.getContentResolver().openInputStream(uris.get(i)));
-                    PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(sample.getWidth(), sample.getHeight(), 1).create();
+                    PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(convertWidth, convertHeight, 1).create();
                     PdfDocument.Page page = document.startPage(pageInfo);
-                    page.getCanvas().drawBitmap(sample,0,0,null);
+                    Canvas canvas = page.getCanvas();
+                    Paint paint = new Paint();
+                    canvas.drawPaint(paint);
+                    Bitmap bitmap=Bitmap.createScaledBitmap(sample,convertWidth,convertHeight,true);
+                    paint.setColor(Color.BLUE);
+                    canvas.drawBitmap(bitmap,20,20,null);
                     //Paint paint=new Paint();
 
                     document.finishPage(page);
