@@ -3,7 +3,6 @@ package com.example.imagetopdf.Adapters;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -20,11 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.imagetopdf.BuildConfig;
 import com.example.imagetopdf.R;
-import com.example.imagetopdf.Utils.Constants;
-import com.example.imagetopdf.ui.HomeScreen;
-import com.example.imagetopdf.ui.PdfOpener;
 
 import java.io.File;
 import java.util.List;

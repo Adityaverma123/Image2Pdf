@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -25,8 +26,10 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -45,6 +48,7 @@ import com.example.imagetopdf.BuildConfig;
 import com.example.imagetopdf.Model.PdfModel;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
+import com.google.android.material.snackbar.Snackbar;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -72,19 +76,23 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
     Uri path;
     ImageView addGallery;
     List<Uri> cropUris;
-
+    Button button;
     ImageView createPdf;
     int positionOfCrop;
     List<String> pdfs;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     ProgressDialog progressDialog;
+    LinearLayout parent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
         addFileBtn = findViewById(R.id.addFileBtn);
         addGallery = findViewById(R.id.add_gallery);
+        parent=findViewById(R.id.parent);
+        button=findViewById(R.id.open_files);
+
         progressDialog=new ProgressDialog(this);
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
@@ -109,6 +117,13 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                 }
             }
 
+        });
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(HomeScreen.this,PdfLists.class);
+                startActivity(intent);
+            }
         });
         addGallery.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -182,26 +197,34 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
     }
     private void saveToDirectory(PdfDocument document)  {
            dismissDialog();
+        final String filename;
                 File filePath= this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
         if(!dir.exists())
         {
             dir.mkdir();
         }
-        String filename=System.currentTimeMillis()+".pdf";
+         filename=System.currentTimeMillis()+".pdf";
         Log.i("HomePath",dir.toString()+filename.toString());
         File file=new File(dir,filename);
         try {
 
             OutputStream outputStream=new FileOutputStream(file);
             document.writeTo(outputStream);
-            Toast.makeText(getApplicationContext(),"Pdf saved!",Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(),"Pdf saved!",Toast.LENGTH_SHORT).show();
             outputStream.flush();
+            Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            openPdf(filename);
+                        }
+                    }).show();
 
-            Intent intent=new Intent(this,PdfLists.class);
+            //Intent intent=new Intent(this,PdfLists.class);
             editor.putString(Constants.LIST_KEY,filename).apply();
             editor.commit();
-            startActivity(intent);
+            //startActivity(intent);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -210,6 +233,37 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
 
 
     }
+
+    private void openPdf(String filename) {
+        Intent intent=new Intent(Intent.ACTION_VIEW);
+        File file=getImageFile(filename);
+        Uri path;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            path = FileProvider.getUriForFile(this, "com.example.imagetopdf.Utils.FileProvider", file);
+        else
+            path = Uri.fromFile(file);
+        MimeTypeMap map = MimeTypeMap.getSingleton();
+        String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+        String type = map.getMimeTypeFromExtension(ext);
+        intent.setDataAndType(path,type);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try
+        {
+            startActivity(intent);
+        }
+        catch(ActivityNotFoundException e)
+        {
+            Toast.makeText(this, "No Application available to view pdf", Toast.LENGTH_LONG).show();
+        }
+    }
+    private File getImageFile(String filename) {
+        File filePath= this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+        File file=new File(dir,filename);
+        return file;
+    }
+
     private void showDialog()
     {
         progressDialog.show();

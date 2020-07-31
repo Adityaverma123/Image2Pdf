@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.HomeScreen"
@@ -25,6 +26,7 @@
             />
 
         <LinearLayout
+            android:id="@+id/camAndGall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/recycler_view"
@@ -44,7 +46,16 @@
                 android:layout_marginStart="10dp"/>
 
 
+
         </LinearLayout>
+        <Button
+            android:id="@+id/open_files"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Open files"
+            android:layout_centerInParent="true"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"/>
         <Button
             android:id="@+id/addFileBtn"
             android:layout_width="match_parent"
