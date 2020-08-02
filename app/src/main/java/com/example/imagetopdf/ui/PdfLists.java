@@ -42,7 +42,6 @@ public class PdfLists extends AppCompatActivity implements Serializable {
     SharedPreferences sharedPreferences;
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
-    private Parcelable savedRecyclerLayoutState;
     PdfAdapter adapter;
     List<String>names;
     PdfModel model;

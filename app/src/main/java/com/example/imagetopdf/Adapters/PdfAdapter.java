@@ -20,6 +20,7 @@ import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.imagetopdf.R;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.util.List;
@@ -44,28 +45,35 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         holder.layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(Intent.ACTION_VIEW);
-                File file=getImageFile(position);
-                Uri path;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                    path = FileProvider.getUriForFile(context, "com.example.imagetopdf.Utils.FileProvider", file);
-                else
-                    path = Uri.fromFile(file);
-                MimeTypeMap map = MimeTypeMap.getSingleton();
-                String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
-                String type = map.getMimeTypeFromExtension(ext);
-                intent.setDataAndType(path,type);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                try
-                    {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                File file = getImageFile(position);
+                if (file.exists()) {
+
+                    Uri path;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                        path = FileProvider.getUriForFile(context, "com.example.imagetopdf.Utils.FileProvider", file);
+                    else
+                        path = Uri.fromFile(file);
+                    MimeTypeMap map = MimeTypeMap.getSingleton();
+                    String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+                    String type = map.getMimeTypeFromExtension(ext);
+                    intent.setDataAndType(path, type);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    try {
                         context.startActivity(intent);
-                    }
-                    catch(ActivityNotFoundException e)
-                    {
+                    } catch (ActivityNotFoundException e) {
                         Toast.makeText(context, "No Application available to view pdf", Toast.LENGTH_LONG).show();
                     }
                 }
+                else {
+                    names.remove(position);
+                    notifyItemRemoved(position);
+                    Toast.makeText(context,"Item doesn't exist",Toast.LENGTH_SHORT).show();
+                }
+            }
+
+
 
 
         });
@@ -74,8 +82,12 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
 
     private File getImageFile(int position) {
+
+
+
         File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+
         String fileName=names.get(position);
         File file=new File(dir,fileName);
         return file;
