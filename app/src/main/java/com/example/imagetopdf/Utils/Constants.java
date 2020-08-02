@@ -12,5 +12,7 @@ public class Constants {
     public static final String SHARED_PREFS="shared_prefs";
     public static final String LIST_KEY="pdf_key";
     public static final String SEND_NAME="send_name";
-
+    public static final String STATE_TITLE="state_title";
+    public static final String STATE_LIST="state_list";
+    public static final String BUNDLE_RECYCLER_LAYOUT="recycler_layout";
 }

@@ -49,6 +49,7 @@ import com.example.imagetopdf.Model.PdfModel;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -84,6 +85,7 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
     SharedPreferences.Editor editor;
     ProgressDialog progressDialog;
     LinearLayout parent;
+    Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,7 +100,7 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
         createPdf = findViewById(R.id.createPdfBtn);
-        sharedPreferences=getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+        sharedPreferences=getSharedPreferences("home2List",Context.MODE_PRIVATE);
         editor=sharedPreferences.edit();
         createPdf.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,7 +123,8 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(HomeScreen.this,PdfLists.class);
+                 intent=new Intent(HomeScreen.this,PdfLists.class);
+
                 startActivity(intent);
             }
         });
@@ -220,11 +223,12 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                             openPdf(filename);
                         }
                     }).show();
-
-            //Intent intent=new Intent(this,PdfLists.class);
-            editor.putString(Constants.LIST_KEY,filename).apply();
+//            intent.putExtra("name",filename)
+            uris.clear();
+            adapter.notifyDataSetChanged();
+            editor.putString("name",filename).apply();
             editor.commit();
-            //startActivity(intent);
+//            startActivity(intent);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -233,6 +237,7 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
 
 
     }
+
 
     private void openPdf(String filename) {
         Intent intent=new Intent(Intent.ACTION_VIEW);
@@ -455,4 +460,5 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                 .getIntent(this);
         startActivityForResult(intent, requestcode);
     }
+
 }

@@ -85,7 +85,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return names.size();
+        return (names.size());
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
