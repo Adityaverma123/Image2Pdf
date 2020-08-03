@@ -216,9 +216,6 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             uris.clear();
             adapter.notifyDataSetChanged();
 
-//            editor.putString("name",filename).apply();
-//            editor.commit();
-
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
@@ -349,11 +346,6 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     private File getImageFile() throws IOException {
 
         String imageFileName = "JPEG_" + System.currentTimeMillis() + "_";
-//        File storageDir = new File(
-//                Environment.getExternalStoragePublicDirectory(
-//                        Environment.DIRECTORY_DCIM
-//                ), "Camera"
-//        );
         File file = File.createTempFile(
                 imageFileName, ".jpg", context.getCacheDir()
         );
@@ -363,7 +355,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
 
 
     private void openSource() {
-//dialog.dismiss();
+
         CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).start(activity);
     }
 

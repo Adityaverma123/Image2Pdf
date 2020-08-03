@@ -38,14 +38,11 @@ import java.util.UUID;
 
 public class PdfLists extends AppCompatActivity implements Serializable {
     RecyclerView recyclerView;
-    List<PdfDocument> pdfLists;
     SharedPreferences sharedPreferences;
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
     PdfAdapter adapter;
     List<String>names;
-    PdfModel model;
-    String type="showfiles";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,11 +77,6 @@ public class PdfLists extends AppCompatActivity implements Serializable {
         
     }
 
-    private void createList() {
-
-        //sharedPreferences=getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
-       // String name=sharedPreferences.getString(Constants.LIST_KEY,"default.pdf");
-    }
     private void saveData()
     {
         sharedPreferences=getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
@@ -95,10 +87,6 @@ public class PdfLists extends AppCompatActivity implements Serializable {
         editor.apply();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
 
     private  void  loadData()
     {

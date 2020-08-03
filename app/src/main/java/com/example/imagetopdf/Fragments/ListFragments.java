@@ -62,13 +62,7 @@ public class ListFragments extends Fragment {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                final String name = preferences.getString("name", null);
-                if(name==null)
-                {
-                    refreshLayout.setRefreshing(false);
-                }
-                else
-                insertData(name);
+               loadData();
             }
         });
         loadData();
@@ -106,11 +100,6 @@ public class ListFragments extends Fragment {
 
     }
 
-    private void createList() {
-
-        //sharedPreferences=getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
-        // String name=sharedPreferences.getString(Constants.LIST_KEY,"default.pdf");
-    }
     private void saveData()
     {
         sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
@@ -124,6 +113,7 @@ public class ListFragments extends Fragment {
 
     private  void  loadData()
     {
+        refreshLayout.setRefreshing(false);
         SharedPreferences sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
         Gson gson=new Gson();
         String json=sharedPreferences.getString("task_list",null);
