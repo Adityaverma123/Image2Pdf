@@ -3,6 +3,8 @@ package com.example.imagetopdf.Fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -10,16 +12,26 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -36,12 +48,17 @@ import com.example.imagetopdf.Adapters.OnChangePic;
 import com.example.imagetopdf.BuildConfig;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
+import com.example.imagetopdf.ui.HomeScreen;
+import com.example.imagetopdf.ui.PdfLists;
+import com.google.android.material.snackbar.Snackbar;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -49,11 +66,7 @@ import java.util.List;
 import static android.app.Activity.RESULT_OK;
 
 public class AddFileFragment extends Fragment implements OnChangePic {
-
-    private Button addFileBtn;
-    private Context context;
     private List<Uri> uris;
-    ;
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
 
@@ -62,13 +75,17 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     Uri path;
     ImageView addGallery;
     List<Uri> cropUris;
-    Activity activity;
+    Button button;
     ImageView createPdf;
     int positionOfCrop;
-    List<String>pdfs;
+    List<String> pdfs;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
-    FragmentListener listener;
+    ProgressDialog progressDialog;
+    LinearLayout parent;
+    Intent intent;
+    Context context;
+    Activity activity;
 
     public AddFileFragment(Context context)
     {
@@ -79,38 +96,51 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_add_file, container, false);
-        addFileBtn = view.findViewById(R.id.addFileBtn);
-        addGallery = view.findViewById(R.id.add_gallery);
         activity = getActivity();
+        addGallery = view.findViewById(R.id.add_gallery);
+        parent=view.findViewById(R.id.parent);
+
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
-        pdfs=new ArrayList<>();
+        pdfs = new ArrayList<>();
         createPdf = view.findViewById(R.id.createPdfBtn);
-        sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+        sharedPreferences=context.getSharedPreferences("home2List",Context.MODE_PRIVATE);
         editor=sharedPreferences.edit();
         createPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
-                    } else {
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
+                } else {
+                    if(uris.size()>0) {
+                        showDialog();
                         createPdf();
                     }
+                    else {
+                        Toast.makeText(context,"Please Add Images",Toast.LENGTH_SHORT).show();
+                    }
                 }
+            }
 
+        });
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                intent=new Intent(context, PdfLists.class);
+
+                startActivity(intent);
+            }
         });
         addGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
 
-                    }
-
-                else {
-                    Log.i("Click","Gallery clicked");
+                } else {
+                    Log.i("Click", "Gallery clicked");
                     openGallery();
                 }
 
@@ -123,18 +153,16 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             public void onClick(View view) {
                 try {
 
-                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
 
-                        }
-                     else
+                    } else
                         openCamera();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         });
-//        uris.clear();
         adapter = new ImageAdapter(context, uris, new ImageAdapter.OnItemClickListener() {
             @Override
             public void onItemClicked(int position, View v) {
@@ -162,45 +190,132 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             }
         });
         itemTouchHelper.attachToRecyclerView(recyclerView);
-//        LinearLayoutManager manager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
         GridLayoutManager manager = new GridLayoutManager(context, 3);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
-        addFileBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openSource();
-            }
-        });
-
         return view;
     }
+    private void saveToDirectory(PdfDocument document)  {
+        dismissDialog();
+        final String filename;
+        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+        if(!dir.exists())
+        {
+            dir.mkdir();
+        }
+        filename=System.currentTimeMillis()+".pdf";
+        Log.i("HomePath",dir.toString()+filename.toString());
+        File file=new File(dir,filename);
+        try {
 
-    private void createPdf() {
-            if (uris.size() > 0) {
-                try {
-                    for (int i = 0; i < uris.size(); i++) {
-                        String uri = uris.get(i).toString();
-                        pdfs.add(uri);
-                    }
+            OutputStream outputStream=new FileOutputStream(file);
+            document.writeTo(outputStream);
+            outputStream.flush();
+            Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            openPdf(filename);
+                        }
+                    }).show();
+            uris.clear();
+            adapter.notifyDataSetChanged();
+            editor.putString("name",filename).apply();
+            editor.commit();
 
-                    //listener.onInputSend(ObjectSerializer.serialize((Serializable) pdfs));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                listener.onInputSend(pdfs);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
+        }
 
-        else {
-            Toast.makeText(context,"Please add Images",Toast.LENGTH_SHORT).show();
+
+    }
+
+
+    private void openPdf(String filename) {
+        Intent intent=new Intent(Intent.ACTION_VIEW);
+        File file=getImageFile(filename);
+        Uri path;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            path = FileProvider.getUriForFile(context, "com.example.imagetopdf.Utils.FileProvider", file);
+        else
+            path = Uri.fromFile(file);
+        MimeTypeMap map = MimeTypeMap.getSingleton();
+        String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+        String type = map.getMimeTypeFromExtension(ext);
+        intent.setDataAndType(path,type);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try
+        {
+            startActivity(intent);
+        }
+        catch(ActivityNotFoundException e)
+        {
+            Toast.makeText(context, "No Application available to view pdf", Toast.LENGTH_LONG).show();
         }
     }
-    public interface FragmentListener{
-        void onInputSend(List<String>StringUris);
+    private File getImageFile(String filename) {
+        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+        File file=new File(dir,filename);
+        return file;
     }
 
+    private void showDialog()
+    {
+        progressDialog.show();
+        progressDialog.setMessage("Please wait...");
+    }
+    private void dismissDialog()
+    {
+        progressDialog.dismiss();
+    }
+
+    private void createPdf()  {
+
+        try {
+            PdfDocument document = new PdfDocument();
+            for (int i = 0; i < uris.size(); i++)
+            {
+                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                Display display = wm.getDefaultDisplay();
+                DisplayMetrics displaymetrics = new DisplayMetrics();
+                activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                float height = displaymetrics.heightPixels ;
+                float width = displaymetrics.widthPixels ;
+                int convertHeight = (int) height, convertWidth = (int) width;
+                Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(i)));
+                PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(convertWidth, convertHeight, 1).create();
+                PdfDocument.Page page = document.startPage(pageInfo);
+                Canvas canvas = page.getCanvas();
+                Paint paint = new Paint();
+                canvas.drawPaint(paint);
+                Bitmap bitmap=Bitmap.createScaledBitmap(sample,convertWidth,convertHeight,true);
+                paint.setColor(Color.BLUE);
+                canvas.drawBitmap(bitmap,20,20,null);
+
+                document.finishPage(page);
+            }
+            saveToDirectory(document);
+            document.close();
+
+            Log.i("pdf", document.toString());
+
+        }
+        catch (Exception e) {
+            dismissDialog();
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.i("error", e.getMessage());
+        }
 
 
+    }
+
+    public interface FragmentListener {
+        void onInputSend(List<String> StringUris);
+    }
 
 
     @SuppressLint("IntentReset")
@@ -209,7 +324,6 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         intent.setType("image/*");
         String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent, Constants.OPENGALLERY);
 
@@ -220,7 +334,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         File file = getImageFile();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) // 2
-            path = FileProvider.getUriForFile(getActivity(), BuildConfig.APPLICATION_ID.concat(".provider"), file);
+            path = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID.concat(".provider"), file);
         else
             path = Uri.fromFile(file); // 3
         intent.putExtra(MediaStore.EXTRA_OUTPUT, path); // 4
@@ -236,7 +350,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
 //                ), "Camera"
 //        );
         File file = File.createTempFile(
-                imageFileName, ".jpg", getContext().getCacheDir()
+                imageFileName, ".jpg", context.getCacheDir()
         );
         currentPhotoPath = "file:" + file.getAbsolutePath();
         return file;
@@ -245,7 +359,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
 
     private void openSource() {
 //dialog.dismiss();
-        CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).start(getContext(), this);
+        CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).start(activity);
     }
 
     @Override
@@ -259,7 +373,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                     Uri imageUri = result.getUri();
                     uris.add(imageUri);
                     cropUris.add(imageUri);
-                    InputStream input = getContext().getContentResolver().openInputStream(imageUri);
+                    InputStream input = context.getContentResolver().openInputStream(imageUri);
                     Bitmap bitmap = BitmapFactory.decodeStream(input);
                     Log.i("imageuri", imageUri.toString());
 //                    bitmaps.add(bitmap);
@@ -280,37 +394,15 @@ public class AddFileFragment extends Fragment implements OnChangePic {
 
         } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
             if (data != null) {
-                ClipData clipData = data.getClipData();
-                if (clipData != null) {
-                    try {
 
-
-                        for (int i = 0; i < clipData.getItemCount(); i++) {
-                            Uri uri = clipData.getItemAt(i).getUri();
-                            uris.add(uri);
-                            InputStream stream = getContext().getContentResolver().openInputStream(uri);
-                            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-                            cropUris.add(uri);
-//                            bitmaps.add(bitmap);
-                            adapter.notifyDataSetChanged();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    try {
-                        Uri uri = data.getData();
-                        cropUris.add(uri);
-                        uris.add(uri);
-                        InputStream stream = getContext().getContentResolver().openInputStream(uri);
-                        Bitmap bitmap = BitmapFactory.decodeStream(stream);
-//                        bitmaps.add(bitmap);
-                        adapter.notifyDataSetChanged();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    Uri uri = data.getData();
+                    startCrop(uri,Constants.CROP_CAMERA);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
+
         } else if (requestCode == Constants.CHANGE_PIC) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             if (resultCode == RESULT_OK) {
@@ -355,7 +447,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     public void startCrop(Uri uri, int requestcode) {
         Intent intent = CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
                 .setActivityTitle("Crop")
-                .getIntent(activity);
+                .getIntent(context);
         startActivityForResult(intent, requestcode);
     }
 

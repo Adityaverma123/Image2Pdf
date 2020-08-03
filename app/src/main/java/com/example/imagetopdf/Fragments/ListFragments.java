@@ -23,11 +23,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.imagetopdf.Adapters.PdfAdapter;
+import com.example.imagetopdf.Model.PdfModel;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
 import com.example.imagetopdf.Utils.ObjectSerializer;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -36,12 +40,14 @@ public class ListFragments extends Fragment implements Serializable{
     RecyclerView recyclerView;
     List<PdfDocument> pdfLists;
     SharedPreferences sharedPreferences;
-    Context context;
+    SharedPreferences preferences;
+    SharedPreferences.Editor editor;
     PdfAdapter adapter;
     List<String>names;
-    List<String>pdf;
-    List<PdfDocument>documents;
-    TextView first;
+    PdfModel model;
+    String type="showfiles";
+    Context context;
+    View view;
     public ListFragments(Context context)
     {
         this.context=context;
@@ -49,27 +55,61 @@ public class ListFragments extends Fragment implements Serializable{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_list_fragments, container, false);
-        recyclerView = view.findViewById(R.id.pdf_list);
-        names=new ArrayList<>();
-        pdf=new ArrayList<>();
-        documents=new ArrayList<>();
+         view = inflater.inflate(R.layout.fragment_list_fragments, container, false);preferences = context.getSharedPreferences("home2List", Context.MODE_PRIVATE);
+        String name = preferences.getString("name", null);
+        loadData();
+        buildRecyclerView();
+        insertData(name);
 
+        return view;
+    }
+    private void buildRecyclerView() {
+        recyclerView = view.findViewById(R.id.pdf_list);
+        recyclerView.setHasFixedSize(true);
         adapter=new PdfAdapter(context,names);
         LinearLayoutManager manager=new LinearLayoutManager(context);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
-
-        return view;
     }
-    private void createPdf(List<String> uris)
+
+    private void insertData(String name) {
+
+        if(name!=null) {
+            Log.i("name", name);
+            names.add(name);
+            adapter.notifyItemInserted(names.size());
+            saveData();
+            preferences.edit().clear().apply();
+        }
+
+    }
+
+    private void createList() {
+
+        //sharedPreferences=getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+        // String name=sharedPreferences.getString(Constants.LIST_KEY,"default.pdf");
+    }
+    private void saveData()
     {
-
+        sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+        editor=sharedPreferences.edit();
+        Gson gson=new Gson();
+        String json=gson.toJson(names);
+        editor.putString("task_list",json);
+        editor.apply();
     }
 
 
-
-
-
-
+    private  void  loadData()
+    {
+        SharedPreferences sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+        Gson gson=new Gson();
+        String json=sharedPreferences.getString("task_list",null);
+        Type type=new TypeToken<ArrayList<String>>(){}.getType();
+        names=gson.fromJson(json,type);
+        if(names==null)
+        {
+            names=new ArrayList<>();
+        }
+    }
 }

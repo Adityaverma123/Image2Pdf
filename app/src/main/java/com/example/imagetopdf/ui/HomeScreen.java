@@ -68,7 +68,6 @@ import java.util.UUID;
 public class HomeScreen extends AppCompatActivity implements OnChangePic, Serializable {
     private Button addFileBtn;
     private List<Uri> uris;
-    ;
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
 
@@ -159,7 +158,6 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                 }
             }
         });
-//        uris.clear();
         adapter = new ImageAdapter(this, uris, new ImageAdapter.OnItemClickListener() {
             @Override
             public void onItemClicked(int position, View v) {
@@ -187,7 +185,6 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
             }
         });
         itemTouchHelper.attachToRecyclerView(recyclerView);
-//        LinearLayoutManager manager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
         GridLayoutManager manager = new GridLayoutManager(this, 3);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
@@ -214,7 +211,6 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
 
             OutputStream outputStream=new FileOutputStream(file);
             document.writeTo(outputStream);
-            //Toast.makeText(getApplicationContext(),"Pdf saved!",Toast.LENGTH_SHORT).show();
             outputStream.flush();
             Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
                     new View.OnClickListener() {
@@ -223,12 +219,10 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                             openPdf(filename);
                         }
                     }).show();
-//            intent.putExtra("name",filename)
             uris.clear();
             adapter.notifyDataSetChanged();
             editor.putString("name",filename).apply();
             editor.commit();
-//            startActivity(intent);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -301,7 +295,6 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                     Bitmap bitmap=Bitmap.createScaledBitmap(sample,convertWidth,convertHeight,true);
                     paint.setColor(Color.BLUE);
                     canvas.drawBitmap(bitmap,20,20,null);
-                    //Paint paint=new Paint();
 
                     document.finishPage(page);
                 }
@@ -309,10 +302,7 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                 document.close();
 
                 Log.i("pdf", document.toString());
-//            PdfModel model=new PdfModel(document);
-//            Intent intent=new Intent(this,PdfLists.class);
-//            intent.putExtra(Constants.LIST_KEY,model);
-//            startActivity(intent);
+
         }
         catch (Exception e) {
             dismissDialog();
