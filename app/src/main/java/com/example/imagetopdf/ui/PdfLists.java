@@ -95,6 +95,10 @@ public class PdfLists extends AppCompatActivity implements Serializable {
         editor.apply();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 
     private  void  loadData()
     {

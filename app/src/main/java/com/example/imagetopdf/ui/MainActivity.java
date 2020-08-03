@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AddFileFragment.RefreshList {
     TabLayout tabLayout;
     ViewPager viewPager;
     AddFileFragment fileFragment;
@@ -42,6 +42,13 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
     }
 
+    @Override
+    public void sendName(String name) {
+        String tag = "android:switcher:" + R.id.view_pager   + ":" + 1;
+        ListFragments f=(ListFragments)getSupportFragmentManager().findFragmentByTag(tag);
+        f.addReceivedName(name);
+    }
+
     private class ViewPagerAdapter extends FragmentPagerAdapter {
         ArrayList<String> fragmentTitleList=new ArrayList<>();
         List<Fragment> fragmentList=new ArrayList<>();
@@ -58,17 +65,6 @@ public class MainActivity extends AppCompatActivity {
             mFragmentTags = new HashMap<Integer, String>();
         }
 
-        @NonNull
-        @Override
-        public Object instantiateItem(@NonNull ViewGroup container, int position) {
-            Object object= super.instantiateItem(container, position);
-            if (object instanceof Fragment) {
-                Fragment fragment = (Fragment) object;
-                String tag = fragment.getTag();
-                mFragmentTags.put(position, tag);
-            }
-            return object;
-        }
 
         @NonNull
         @Override

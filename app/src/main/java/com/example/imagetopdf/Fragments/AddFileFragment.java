@@ -70,7 +70,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     private List<Uri> uris;
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
-
+    RefreshList refreshList;
 
     String currentPhotoPath = "";
     Uri path;
@@ -205,6 +205,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             OutputStream outputStream=new FileOutputStream(file);
             document.writeTo(outputStream);
             outputStream.flush();
+            refreshList.sendName(filename);
             Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
                     new View.OnClickListener() {
                         @Override
@@ -214,8 +215,9 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                     }).show();
             uris.clear();
             adapter.notifyDataSetChanged();
-            editor.putString("name",filename).apply();
-            editor.commit();
+
+//            editor.putString("name",filename).apply();
+//            editor.commit();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -306,8 +308,18 @@ public class AddFileFragment extends Fragment implements OnChangePic {
 
     }
 
-    public interface FragmentListener {
-        void onInputSend(List<String> StringUris);
+    public interface RefreshList {
+        void sendName(String name);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        try {
+            refreshList = (RefreshList) getActivity();
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Error in retrieving data. Please try again");
+        }
     }
 
 

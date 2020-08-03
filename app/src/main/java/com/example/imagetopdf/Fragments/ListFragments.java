@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class ListFragments extends Fragment implements Serializable{
+public class ListFragments extends Fragment {
     RecyclerView recyclerView;
     List<PdfDocument> pdfLists;
     SharedPreferences sharedPreferences;
@@ -62,7 +62,13 @@ public class ListFragments extends Fragment implements Serializable{
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                loadData();
+                final String name = preferences.getString("name", null);
+                if(name==null)
+                {
+                    refreshLayout.setRefreshing(false);
+                }
+                else
+                insertData(name);
             }
         });
         loadData();
@@ -72,10 +78,9 @@ public class ListFragments extends Fragment implements Serializable{
         return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        loadData();
+    public void addReceivedName(String name)
+    {
+        insertData(name);
     }
 
     private void buildRecyclerView(View view) {
@@ -91,6 +96,7 @@ public class ListFragments extends Fragment implements Serializable{
     private void insertData(String name) {
 
         if(name!=null) {
+            refreshLayout.setRefreshing(false);
             Log.i("name", name);
             names.add(name);
             adapter.notifyItemInserted(names.size());
@@ -118,7 +124,6 @@ public class ListFragments extends Fragment implements Serializable{
 
     private  void  loadData()
     {
-        refreshLayout.setRefreshing(false);
         SharedPreferences sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
         Gson gson=new Gson();
         String json=sharedPreferences.getString("task_list",null);
@@ -129,4 +134,6 @@ public class ListFragments extends Fragment implements Serializable{
             names=new ArrayList<>();
         }
     }
+
+
 }
