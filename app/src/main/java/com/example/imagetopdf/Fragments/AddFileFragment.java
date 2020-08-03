@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -82,7 +83,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     ProgressDialog progressDialog;
-    LinearLayout parent;
+    FrameLayout parent;
     Intent intent;
     Context context;
     Activity activity;
@@ -99,7 +100,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         activity = getActivity();
         addGallery = view.findViewById(R.id.add_gallery);
         parent=view.findViewById(R.id.parent);
-
+        progressDialog=new ProgressDialog(context);
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
@@ -123,14 +124,6 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                 }
             }
 
-        });
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                intent=new Intent(context, PdfLists.class);
-
-                startActivity(intent);
-            }
         });
         addGallery.setOnClickListener(new View.OnClickListener() {
             @Override

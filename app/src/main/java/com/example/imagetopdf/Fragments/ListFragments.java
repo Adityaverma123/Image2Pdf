@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -47,7 +48,7 @@ public class ListFragments extends Fragment implements Serializable{
     PdfModel model;
     String type="showfiles";
     Context context;
-    View view;
+    SwipeRefreshLayout refreshLayout;
     public ListFragments(Context context)
     {
         this.context=context;
@@ -55,15 +56,22 @@ public class ListFragments extends Fragment implements Serializable{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-         view = inflater.inflate(R.layout.fragment_list_fragments, container, false);preferences = context.getSharedPreferences("home2List", Context.MODE_PRIVATE);
-        String name = preferences.getString("name", null);
+       View  view = inflater.inflate(R.layout.fragment_list_fragments, container, false);preferences = context.getSharedPreferences("home2List", Context.MODE_PRIVATE);
+        final String name = preferences.getString("name", null);
+        refreshLayout=view.findViewById(R.id.swipe_refresh);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadData();
+            }
+        });
         loadData();
-        buildRecyclerView();
+        buildRecyclerView(view);
         insertData(name);
 
         return view;
     }
-    private void buildRecyclerView() {
+    private void buildRecyclerView(View view) {
         recyclerView = view.findViewById(R.id.pdf_list);
         recyclerView.setHasFixedSize(true);
         adapter=new PdfAdapter(context,names);
@@ -71,6 +79,7 @@ public class ListFragments extends Fragment implements Serializable{
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
     }
+
 
     private void insertData(String name) {
 
@@ -102,6 +111,7 @@ public class ListFragments extends Fragment implements Serializable{
 
     private  void  loadData()
     {
+        refreshLayout.setRefreshing(false);
         SharedPreferences sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
         Gson gson=new Gson();
         String json=sharedPreferences.getString("task_list",null);
