@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
+import android.view.ViewGroup;
 
 import com.example.imagetopdf.Fragments.AddFileFragment;
 import com.example.imagetopdf.Fragments.ListFragments;
@@ -16,7 +17,9 @@ import com.example.imagetopdf.R;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     TabLayout tabLayout;
@@ -42,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private class ViewPagerAdapter extends FragmentPagerAdapter {
         ArrayList<String> fragmentTitleList=new ArrayList<>();
         List<Fragment> fragmentList=new ArrayList<>();
+        private Map<Integer, String> mFragmentTags;
+        private FragmentManager mFragmentManager;
         public void addFragment(Fragment fragment,String title)
         {
             fragmentTitleList.add(title);
@@ -49,6 +54,20 @@ public class MainActivity extends AppCompatActivity {
         }
         public ViewPagerAdapter(@NonNull FragmentManager fm) {
             super(fm);
+            mFragmentManager = fm;
+            mFragmentTags = new HashMap<Integer, String>();
+        }
+
+        @NonNull
+        @Override
+        public Object instantiateItem(@NonNull ViewGroup container, int position) {
+            Object object= super.instantiateItem(container, position);
+            if (object instanceof Fragment) {
+                Fragment fragment = (Fragment) object;
+                String tag = fragment.getTag();
+                mFragmentTags.put(position, tag);
+            }
+            return object;
         }
 
         @NonNull
@@ -67,5 +86,7 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             return fragmentTitleList.get(position);
         }
+
+
     }
 }

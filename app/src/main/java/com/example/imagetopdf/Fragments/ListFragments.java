@@ -71,6 +71,13 @@ public class ListFragments extends Fragment implements Serializable{
 
         return view;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadData();
+    }
+
     private void buildRecyclerView(View view) {
         recyclerView = view.findViewById(R.id.pdf_list);
         recyclerView.setHasFixedSize(true);

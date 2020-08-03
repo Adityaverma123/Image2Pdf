@@ -18,6 +18,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -74,22 +75,19 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                     } catch (ActivityNotFoundException e) {
                         Toast.makeText(context, "No Application available to view pdf", Toast.LENGTH_LONG).show();
                     }
-                }
-                else {
+                } else {
                     names.remove(position);
                     notifyItemRemoved(position);
-                    Toast.makeText(context,"Item doesn't exist",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Item doesn't exist", Toast.LENGTH_SHORT).show();
                 }
             }
-
-
 
 
         });
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteItem(v,position);
+                deleteItem(v, position);
             }
         });
         holder.pdfName.setText(names.get(position));
@@ -102,7 +100,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                     path = FileProvider.getUriForFile(context, "com.example.imagetopdf.Utils.FileProvider", file);
                 else
                     path = Uri.fromFile(file);
-                Intent shareIntent=new Intent(Intent.ACTION_SEND);
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 MimeTypeMap map = MimeTypeMap.getSingleton();
                 String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
                 String type = map.getMimeTypeFromExtension(ext);
@@ -154,6 +152,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
 
 
+
     @Override
     public int getItemCount() {
         return (names.size());
@@ -161,7 +160,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         TextView pdfName;
-        RelativeLayout layout;
+        LinearLayout layout;
         ImageView delete;
         ImageView share;
         public ViewHolder(@NonNull View itemView) {
@@ -172,4 +171,5 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             share=itemView.findViewById(R.id.share);
         }
     }
+
 }
