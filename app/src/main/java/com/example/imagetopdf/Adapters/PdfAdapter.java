@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,8 @@ import java.util.List;
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     Context context;
     List<String >names;
+    private static final int TYPE_HEAD=0;
+    private static final int TYPE_LIST=1;
     public PdfAdapter(Context context, List<String>names)
     {
         this.context=context;
@@ -46,69 +49,91 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view= LayoutInflater.from(context).inflate(R.layout.pdf_list_item,null,false);
-        return new ViewHolder(view);
+        View view;
+        if(viewType==R.layout.pdf_list_item) {
+
+            view = LayoutInflater.from(context).inflate(R.layout.pdf_list_item, parent, false);
+            return new ViewHolder(view);
+        }
+        if(viewType==R.layout.item_header) {
+            view=LayoutInflater.from(context).inflate(R.layout.item_header,parent,false);
+            return new ViewHolder(view);
+        }
+
+        return null;
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
-        holder.layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                File file = getImageFile(position);
-                if (file.exists()) {
+        if(position==names.size())
+        {
+            holder.choose.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i("Clicked","button clicked");
 
+                }
+            });
+        }
+        else {
+            holder.layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    File file = getImageFile(position);
+                    if (file.exists()) {
+
+                        Uri path;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                            path = FileProvider.getUriForFile(context, "com.example.imagetopdf.Utils.FileProvider", file);
+                        else
+                            path = Uri.fromFile(file);
+                        MimeTypeMap map = MimeTypeMap.getSingleton();
+                        String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+                        String type = map.getMimeTypeFromExtension(ext);
+                        intent.setDataAndType(path, type);
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        try {
+                            context.startActivity(intent);
+                        } catch (ActivityNotFoundException e) {
+                            Toast.makeText(context, "No Application available to view pdf", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        names.remove(position);
+                        notifyItemRemoved(position);
+                        Toast.makeText(context, "Item doesn't exist", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+
+            });
+            holder.delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    deleteItem(v, position);
+                }
+            });
+            holder.pdfName.setText(names.get(position));
+            holder.share.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    File file = getImageFile(position);
                     Uri path;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                         path = FileProvider.getUriForFile(context, "com.example.imagetopdf.Utils.FileProvider", file);
                     else
                         path = Uri.fromFile(file);
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
                     MimeTypeMap map = MimeTypeMap.getSingleton();
                     String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
                     String type = map.getMimeTypeFromExtension(ext);
-                    intent.setDataAndType(path, type);
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    try {
-                        context.startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        Toast.makeText(context, "No Application available to view pdf", Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    names.remove(position);
-                    notifyItemRemoved(position);
-                    Toast.makeText(context, "Item doesn't exist", Toast.LENGTH_SHORT).show();
+                    shareIntent.setDataAndType(path, type);
+                    shareIntent.putExtra(Intent.EXTRA_STREAM, path);
+                    context.startActivity(Intent.createChooser(shareIntent, "Share Pdf via:"));
                 }
-            }
-
-
-        });
-        holder.delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                deleteItem(v, position);
-            }
-        });
-        holder.pdfName.setText(names.get(position));
-        holder.share.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                File file = getImageFile(position);
-                Uri path;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                    path = FileProvider.getUriForFile(context, "com.example.imagetopdf.Utils.FileProvider", file);
-                else
-                    path = Uri.fromFile(file);
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                MimeTypeMap map = MimeTypeMap.getSingleton();
-                String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
-                String type = map.getMimeTypeFromExtension(ext);
-                shareIntent.setDataAndType(path, type);
-                shareIntent.putExtra(Intent.EXTRA_STREAM, path);
-                context.startActivity(Intent.createChooser(shareIntent, "Share Pdf via:"));
-            }
-        });
+            });
+        }
     }
 
     private File getImageFile(int position) {
@@ -152,10 +177,16 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
 
 
+    @Override
+    public int getItemViewType(int position) {
+
+
+
+    }
 
     @Override
     public int getItemCount() {
-        return (names.size());
+        return names.size()+1;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
@@ -163,12 +194,16 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         LinearLayout layout;
         ImageView delete;
         ImageView share;
+        ImageView choose;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            pdfName=itemView.findViewById(R.id.pdf_name);
-            layout=itemView.findViewById(R.id.pdf_Layout);
-            delete=itemView.findViewById(R.id.delete);
-            share=itemView.findViewById(R.id.share);
+                pdfName = itemView.findViewById(R.id.pdf_name);
+                layout = itemView.findViewById(R.id.pdf_Layout);
+                delete = itemView.findViewById(R.id.delete);
+                share = itemView.findViewById(R.id.share);
+                choose = itemView.findViewById(R.id.choose);
+
+
         }
     }
 
