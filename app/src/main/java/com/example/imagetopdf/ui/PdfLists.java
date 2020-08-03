@@ -18,6 +18,8 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.Toast;
 
 import com.example.imagetopdf.Adapters.PdfAdapter;
@@ -94,6 +96,7 @@ public class PdfLists extends AppCompatActivity implements Serializable {
         editor.putString("task_list",json);
         editor.apply();
     }
+
 
 
     private  void  loadData()

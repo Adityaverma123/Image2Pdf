@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -298,7 +299,26 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                     Canvas canvas = page.getCanvas();
                     Paint paint = new Paint();
                     canvas.drawPaint(paint);
-                    Bitmap bitmap=Bitmap.createScaledBitmap(sample,convertWidth,convertHeight,true);
+                    float h= sample.getHeight()* Resources.getSystem().getDisplayMetrics().density;
+                    int bitHeight=(int)h;
+                    float w=sample.getWidth()*Resources.getSystem().getDisplayMetrics().density;
+                    int bitWidth=(int)w;
+                    int newHeight,newWidth;
+                    if(convertHeight>bitHeight)
+                    {
+                     newHeight=bitHeight;
+                    }
+                    else {
+                        newHeight=convertHeight;
+                    }
+                    if(convertWidth>bitWidth)
+                    {
+                        newWidth=bitWidth;
+                    }
+                    else {
+                        newWidth=convertWidth;
+                    }
+                    Bitmap bitmap=Bitmap.createScaledBitmap(sample,newWidth,newHeight,true);
                     paint.setColor(Color.BLUE);
                     canvas.drawBitmap(bitmap,20,20,null);
                     //Paint paint=new Paint();

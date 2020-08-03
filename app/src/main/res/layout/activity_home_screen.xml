@@ -20,6 +20,7 @@
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:orientation="horizontal"
+            android:layoutAnimation="@anim/layout_fall_down"
             android:layout_below="@+id/createPdfBtn"
             android:layout_marginTop="25dp"
             android:layout_height="wrap_content"

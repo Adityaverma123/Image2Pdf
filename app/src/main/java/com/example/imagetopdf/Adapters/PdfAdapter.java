@@ -3,6 +3,7 @@ package com.example.imagetopdf.Adapters;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -10,7 +11,16 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LayoutAnimationController;
 import android.webkit.MimeTypeMap;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,7 +30,9 @@ import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.imagetopdf.R;
+import com.example.imagetopdf.Utils.Constants;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.util.List;
@@ -77,8 +89,59 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
 
         });
-
+        holder.delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               deleteItem(v,position);
+            }
+        });
         holder.pdfName.setText(names.get(position));
+        holder.share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                File file = getImageFile(position);
+                Uri path;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    path = FileProvider.getUriForFile(context, "com.example.imagetopdf.Utils.FileProvider", file);
+                else
+                    path = Uri.fromFile(file);
+                Intent shareIntent=new Intent(Intent.ACTION_SEND);
+                MimeTypeMap map = MimeTypeMap.getSingleton();
+                String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+                String type = map.getMimeTypeFromExtension(ext);
+                shareIntent.setDataAndType(path, type);
+                shareIntent.putExtra(Intent.EXTRA_STREAM, path);
+                context.startActivity(Intent.createChooser(shareIntent, "Share Pdf via:"));
+            }
+        });
+    }
+    private void deleteItem(View rowView,int position)
+    {
+        Animation fadeIn = new AlphaAnimation(0, 1);
+        fadeIn.setInterpolator(new DecelerateInterpolator()); //add this
+        fadeIn.setDuration(1000);
+
+        Animation fadeOut = new AlphaAnimation(1, 0);
+        fadeOut.setInterpolator(new AccelerateInterpolator()); //and this
+        fadeOut.setStartOffset(1000);
+        fadeOut.setDuration(1000);
+
+        AnimationSet animation = new AnimationSet(false); //change to false
+        animation.addAnimation(fadeIn);
+        animation.addAnimation(fadeOut);
+        rowView.setAnimation(animation);
+        names.remove(position);
+        notifyItemRemoved(position);
+        notifyDataSetChanged();
+        SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+        preferences.edit().clear().apply();
+
+        SharedPreferences.Editor editor=preferences.edit();
+        Gson gson=new Gson();
+        String json=gson.toJson(names);
+        editor.putString("task_list",json);
+        editor.apply();
+
     }
 
     private File getImageFile(int position) {
@@ -102,11 +165,15 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         TextView pdfName;
-        RelativeLayout layout;
+        LinearLayout layout;
+        ImageView delete;
+        ImageView share;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             pdfName=itemView.findViewById(R.id.pdf_name);
             layout=itemView.findViewById(R.id.pdf_Layout);
+            delete=itemView.findViewById(R.id.delete);
+            share=itemView.findViewById(R.id.share);
         }
     }
 }
