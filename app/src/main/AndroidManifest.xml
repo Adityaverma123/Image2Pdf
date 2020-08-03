@@ -49,9 +49,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="Fragments.AddFileFragment"
-            tools:ignore="DuplicateActivity" />
-        <activity android:name=".ui.PdfOpener"/>
+        <activity android:name=".ui.MainActivity" />
     </application>
 
 </manifest>
