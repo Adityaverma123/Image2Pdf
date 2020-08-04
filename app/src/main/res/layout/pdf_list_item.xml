@@ -3,12 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardBackgroundColor="@android:color/white"
     app:cardCornerRadius="10dp"
     app:cardElevation="5dp"
-    app:cardUseCompatPadding="true">
+    android:layout_margin="5dp"
+    >
     <LinearLayout
+
         android:layout_width="match_parent"
+        android:padding="10dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
@@ -25,17 +27,21 @@
                     android:id="@+id/pdf_image"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
-                    android:src="@drawable/ic_insert"/>
+                    android:src="@drawable/pdf_image"/>
                 <TextView
                     android:id="@+id/pdf_name"
                     android:layout_width="wrap_content"
+                    android:layout_gravity="center"
                     android:layout_height="wrap_content"
-                    android:textSize="17sp"/>
+                    android:fontFamily="@font/caviar_dreams"
+                    android:textSize="16sp"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:foregroundGravity="center"
                 android:layout_alignParentEnd="true"
                 android:gravity="center"
                 android:orientation="horizontal">
@@ -44,13 +50,13 @@
 
                     android:layout_width="35dp"
                     android:layout_height="35dp"
-                    android:src="@drawable/ic_share_black_24dp"/>
+                    android:src="@drawable/share"/>
                 <ImageView
                     android:id="@+id/delete"
                     android:layout_width="35dp"
                     android:layout_marginStart="10dp"
                     android:layout_height="35dp"
-                    android:src="@drawable/ic_delete"/>
+                    android:src="@drawable/delete"/>
 
 
             </LinearLayout>
@@ -58,4 +64,5 @@
         </RelativeLayout>
 
     </LinearLayout>
+
 </androidx.cardview.widget.CardView>
