@@ -15,12 +15,13 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_alignParentEnd="true"
-            android:src="@drawable/ic_insert"
+            android:src="@drawable/pdf_image"
             android:id="@+id/createPdfBtn"/>
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
-            android:layout_width="wrap_content"
-
+            android:layout_width="match_parent"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:layout_below="@+id/createPdfBtn"
             android:layout_marginTop="25dp"
             android:layout_height="wrap_content"

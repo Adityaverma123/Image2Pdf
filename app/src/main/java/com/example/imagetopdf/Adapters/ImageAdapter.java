@@ -26,6 +26,8 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
     Context context;
     List<Uri>uris;
@@ -103,7 +105,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        ImageView imageView;
+        CircleImageView imageView;
         TextView imageNo;
         ImageView deleteBtn;
         public ViewHolder(@NonNull View itemView) {

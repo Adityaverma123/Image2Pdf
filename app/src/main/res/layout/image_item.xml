@@ -8,8 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:id="@+id/deleteIcon"
         android:layout_marginEnd="10dp"
         android:layout_alignParentEnd="true"
@@ -17,7 +17,7 @@
     </RelativeLayout>
 
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:scaleType="centerCrop"
