@@ -49,33 +49,17 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view;
-        if(viewType==R.layout.pdf_list_item) {
 
-            view = LayoutInflater.from(context).inflate(R.layout.pdf_list_item, parent, false);
-            return new ViewHolder(view);
-        }
-        if(viewType==R.layout.item_header) {
-            view=LayoutInflater.from(context).inflate(R.layout.item_header,parent,false);
-            return new ViewHolder(view);
-        }
 
-        return null;
+           View view = LayoutInflater.from(context).inflate(R.layout.pdf_list_item, parent, false);
+            return new ViewHolder(view);
+
+
+
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
-        if(position==names.size())
-        {
-            holder.choose.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.i("Clicked","button clicked");
-
-                }
-            });
-        }
-        else {
             holder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -133,7 +117,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                     context.startActivity(Intent.createChooser(shareIntent, "Share Pdf via:"));
                 }
             });
-        }
+
     }
 
     private File getImageFile(int position) {
@@ -180,13 +164,13 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     @Override
     public int getItemViewType(int position) {
 
-
+        return names.size();
 
     }
 
     @Override
     public int getItemCount() {
-        return names.size()+1;
+        return names.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
@@ -194,14 +178,14 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         LinearLayout layout;
         ImageView delete;
         ImageView share;
-        ImageView choose;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+
                 pdfName = itemView.findViewById(R.id.pdf_name);
                 layout = itemView.findViewById(R.id.pdf_Layout);
                 delete = itemView.findViewById(R.id.delete);
                 share = itemView.findViewById(R.id.share);
-                choose = itemView.findViewById(R.id.choose);
 
 
         }

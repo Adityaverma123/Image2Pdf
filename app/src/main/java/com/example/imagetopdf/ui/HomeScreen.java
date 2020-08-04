@@ -90,7 +90,6 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
         addFileBtn = findViewById(R.id.addFileBtn);
-        addGallery = findViewById(R.id.add_gallery);
         parent=findViewById(R.id.parent);
         button=findViewById(R.id.open_files);
 
@@ -109,7 +108,6 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                     ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
                     if(uris.size()>0) {
-                        showDialog();
                         createPdf();
                     }
                     else {
@@ -127,37 +125,36 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                 startActivity(intent);
             }
         });
-        addGallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+//        addGallery.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+//                    ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
+//
+//                } else {
+//                    Log.i("Click", "Gallery clicked");
+//                    openGallery();
+//                }
+//
+//            }
+//        });
 
-                if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
-
-                } else {
-                    Log.i("Click", "Gallery clicked");
-                    openGallery();
-                }
-
-            }
-        });
-
-        ImageView imageView = findViewById(R.id.addImage);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-
-                    if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
-
-                    } else
-                        openCamera();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+//        imageView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                try {
+//
+//                    if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+//                        ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
+//
+//                    } else
+//                        openCamera();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
         adapter = new ImageAdapter(this, uris, new ImageAdapter.OnItemClickListener() {
             @Override
             public void onItemClicked(int position, View v) {

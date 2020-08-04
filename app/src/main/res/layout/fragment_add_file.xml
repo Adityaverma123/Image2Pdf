@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/fragment_bg"
+    android:background="@drawable/main_background"
     android:layout_margin="5dp"
     android:id="@+id/parent"
     tools:context=".Fragments.AddFileFragment">
@@ -19,44 +19,23 @@
             android:id="@+id/createPdfBtn"/>
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+
             android:layout_below="@+id/createPdfBtn"
             android:layout_marginTop="25dp"
             android:layout_height="wrap_content"
             />
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/recycler_view"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
         <ImageView
+            android:id="@+id/add_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_add_a_photo_black_24dp"
-
-            android:id="@+id/addImage"/>
-        <ImageView
-            android:id="@+id/add_gallery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/add_gallery"
-            android:layout_marginStart="10dp"/>
-
-
-        </LinearLayout>
-        <Button
-            android:id="@+id/addFileBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/add_button_drawable"
-            android:textColor="@android:color/white"
-            android:text="Add Images"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"/>
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="15dp"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/add_image"
+            />
+
 
     </RelativeLayout>
 
