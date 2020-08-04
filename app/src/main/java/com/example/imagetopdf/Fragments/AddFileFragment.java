@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -278,6 +279,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             PdfDocument document = new PdfDocument();
             for (int i = 0; i < uris.size(); i++)
             {
+
                 WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
                 Display display = wm.getDefaultDisplay();
                 DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -291,7 +293,37 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                 Canvas canvas = page.getCanvas();
                 Paint paint = new Paint();
                 canvas.drawPaint(paint);
-                Bitmap bitmap=Bitmap.createScaledBitmap(sample,convertWidth,convertHeight,true);
+                int newHeigth,newWidth;
+                float heightdp=sample.getHeight()* Resources.getSystem().getDisplayMetrics().density;
+                int hpx=(int)heightdp;
+                float widthdp=sample.getWidth()* Resources.getSystem().getDisplayMetrics().density;
+                int wpx=(int)widthdp;
+
+                Log.i("height",String.valueOf(hpx));
+                Log.i("convert height", String.valueOf(convertHeight));
+                if(convertHeight>hpx)
+                {
+                    newHeigth=hpx;
+                    if(hpx<1500)
+                    {
+                        newHeigth=1500;
+                    }
+                }
+                else {
+                    newHeigth=convertHeight;
+                }
+                if(convertWidth>wpx)
+                {
+                    newWidth=wpx;
+                    if(wpx<1500)
+                    {
+                        newWidth=1200;
+                    }
+                }
+                else {
+                    newWidth=convertWidth;
+                }
+                Bitmap bitmap=Bitmap.createScaledBitmap(sample,newWidth,newHeigth,true);
                 paint.setColor(Color.BLUE);
                 canvas.drawBitmap(bitmap,20,20,null);
 
