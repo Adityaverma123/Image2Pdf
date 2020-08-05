@@ -325,7 +325,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                 }
                 Bitmap bitmap=Bitmap.createScaledBitmap(sample,newWidth,newHeigth,true);
                 paint.setColor(Color.BLUE);
-                canvas.drawBitmap(bitmap,20,20,null);
+                canvas.drawBitmap(bitmap,0,0,null);
 
                 document.finishPage(page);
             }
