@@ -279,16 +279,13 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             PdfDocument document = new PdfDocument();
             for (int i = 0; i < uris.size(); i++)
             {
-
-                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                Display display = wm.getDefaultDisplay();
                 DisplayMetrics displaymetrics = new DisplayMetrics();
                 activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
                 float height = displaymetrics.heightPixels ;
                 float width = displaymetrics.widthPixels ;
                 int convertHeight = (int) height, convertWidth = (int) width;
                 Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(i)));
-                PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(convertWidth, convertHeight, 1).create();
+                PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(convertWidth, convertHeight, i+1).create();
                 PdfDocument.Page page = document.startPage(pageInfo);
                 Canvas canvas = page.getCanvas();
                 Paint paint = new Paint();
@@ -325,7 +322,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                 }
                 Bitmap bitmap=Bitmap.createScaledBitmap(sample,newWidth,newHeigth,true);
                 paint.setColor(Color.BLUE);
-                canvas.drawBitmap(bitmap,20,20,null);
+                canvas.drawBitmap(bitmap,0,0,null);
 
                 document.finishPage(page);
             }
