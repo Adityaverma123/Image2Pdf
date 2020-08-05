@@ -1,4 +1,4 @@
-package com.example.imagetopdf.Adapters;
+package com.example.imagetopdf.Interface;
 
 import android.net.Uri;
 

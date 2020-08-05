@@ -41,4 +41,6 @@ dependencies {
     implementation 'com.isseiaoki:simplecropview:1.1.7'
     implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'com.karumi:dexter:6.2.1'
+    implementation 'info.androidhive:imagefilters:1.0.7'
 }
