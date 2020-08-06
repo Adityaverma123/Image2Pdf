@@ -36,6 +36,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -94,6 +95,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     Context context;
     Activity activity;
     ImageView add_image;
+    ProgressBar progressBar;
     public AddFileFragment(Context context)
     {
         this.context=context;
@@ -109,6 +111,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
+        progressBar=view.findViewById(R.id.progress_bar);
         createPdf = view.findViewById(R.id.createPdfBtn);
         sharedPreferences=context.getSharedPreferences("home2List",Context.MODE_PRIVATE);
         editor=sharedPreferences.edit();
@@ -120,7 +123,6 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
                     if(uris.size()>0) {
-
                         createPdf();
                     }
                     else {
@@ -173,6 +175,8 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     }
     private void createPdf()  {
 
+        progressBar.setVisibility(View.VISIBLE);
+
         try {
             final String filename;
             File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
@@ -189,13 +193,6 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             for (int i = 0; i < uris.size(); i++)
             {
                document1.newPage();
-                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                Display display = wm.getDefaultDisplay();
-                DisplayMetrics displaymetrics = new DisplayMetrics();
-                activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-                float height = displaymetrics.heightPixels ;
-                float width = displaymetrics.widthPixels ;
-                int convertHeight = (int) height, convertWidth = (int) width;
                 Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(i)));
                 ByteArrayOutputStream stream=new ByteArrayOutputStream();
                 sample.compress(Bitmap.CompressFormat.PNG,100,stream);
@@ -205,50 +202,10 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                 image.scalePercent(scaler);
                 image.setAlignment(Image.ALIGN_CENTER|Image.ALIGN_TOP);
                 document1.add(image);
-//                PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(794, 1122, i+1).create();
-//                PdfDocument.Page page = document.startPage(pageInfo);
-//                Canvas canvas = page.getCanvas();
-//                Paint paint = new Paint();
-//                canvas.drawPaint(paint);
-//                int newHeigth,newWidth;
-//                float heightdp=sample.getHeight()* Resources.getSystem().getDisplayMetrics().density;
-//                int hpx=(int)heightdp;
-//                float widthdp=sample.getWidth()* Resources.getSystem().getDisplayMetrics().density;
-//                int wpx=(int)widthdp;
-//
-//                Log.i("height",String.valueOf(hpx));
-//                Log.i("convert height", String.valueOf(convertHeight));
-//                if(convertHeight>hpx)
-//                {
-//                    newHeigth=hpx;
-//                    if(hpx<1500)
-//                    {
-//                        newHeigth=1500;
-//                    }
-//                }
-//                else {
-//                    newHeigth=convertHeight;
-//                }
-//                if(convertWidth>wpx)
-//                {
-//                    newWidth=wpx;
-//                    if(wpx<1500)
-//                    {
-//                        newWidth=1200;
-//                    }
-//                }
-//                else {
-//                    newWidth=convertWidth;
-//                }
-//                Bitmap bitmap=Bitmap.createScaledBitmap(sample,612,792,true);
-//                paint.setColor(Color.BLUE);
-//                canvas.drawBitmap(bitmap,0,0,null);
-//
-//                document.finishPage(page);
-
             }
-//            saveToDirectory(document1);
+
             document1.close();
+            refreshList.sendName(filename);
             Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
                     new View.OnClickListener() {
                         @Override
@@ -266,6 +223,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
             Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
             Log.i("error", e.getMessage());
         }
+        progressBar.setVisibility(View.GONE);
 
 
     }
