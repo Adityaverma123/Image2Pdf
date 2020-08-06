@@ -55,9 +55,13 @@ import com.example.imagetopdf.Utils.Constants;
 import com.example.imagetopdf.ui.HomeScreen;
 import com.example.imagetopdf.ui.PdfLists;
 import com.google.android.material.snackbar.Snackbar;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -167,7 +171,105 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         recyclerView.setAdapter(adapter);
         return view;
     }
-    private void saveToDirectory(PdfDocument document)  {
+    private void createPdf()  {
+
+        try {
+            final String filename;
+            File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+            File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+            if(!dir.exists())
+            {
+                dir.mkdir();
+            }
+            filename=System.currentTimeMillis()+".pdf";
+//            PdfDocument document = new PdfDocument();
+            Document document1=new Document();
+            PdfWriter.getInstance(document1,new FileOutputStream(dir+"/"+filename));
+            document1.open();
+            for (int i = 0; i < uris.size(); i++)
+            {
+               document1.newPage();
+                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                Display display = wm.getDefaultDisplay();
+                DisplayMetrics displaymetrics = new DisplayMetrics();
+                activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                float height = displaymetrics.heightPixels ;
+                float width = displaymetrics.widthPixels ;
+                int convertHeight = (int) height, convertWidth = (int) width;
+                Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(i)));
+                ByteArrayOutputStream stream=new ByteArrayOutputStream();
+                sample.compress(Bitmap.CompressFormat.PNG,100,stream);
+                Image image=Image.getInstance(stream.toByteArray());
+                float scaler = ((document1.getPageSize().getWidth() - document1.leftMargin()
+                        - document1.rightMargin() - 0) / image.getWidth()) * 100;
+                image.scalePercent(scaler);
+                image.setAlignment(Image.ALIGN_CENTER|Image.ALIGN_TOP);
+                document1.add(image);
+//                PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(794, 1122, i+1).create();
+//                PdfDocument.Page page = document.startPage(pageInfo);
+//                Canvas canvas = page.getCanvas();
+//                Paint paint = new Paint();
+//                canvas.drawPaint(paint);
+//                int newHeigth,newWidth;
+//                float heightdp=sample.getHeight()* Resources.getSystem().getDisplayMetrics().density;
+//                int hpx=(int)heightdp;
+//                float widthdp=sample.getWidth()* Resources.getSystem().getDisplayMetrics().density;
+//                int wpx=(int)widthdp;
+//
+//                Log.i("height",String.valueOf(hpx));
+//                Log.i("convert height", String.valueOf(convertHeight));
+//                if(convertHeight>hpx)
+//                {
+//                    newHeigth=hpx;
+//                    if(hpx<1500)
+//                    {
+//                        newHeigth=1500;
+//                    }
+//                }
+//                else {
+//                    newHeigth=convertHeight;
+//                }
+//                if(convertWidth>wpx)
+//                {
+//                    newWidth=wpx;
+//                    if(wpx<1500)
+//                    {
+//                        newWidth=1200;
+//                    }
+//                }
+//                else {
+//                    newWidth=convertWidth;
+//                }
+//                Bitmap bitmap=Bitmap.createScaledBitmap(sample,612,792,true);
+//                paint.setColor(Color.BLUE);
+//                canvas.drawBitmap(bitmap,0,0,null);
+//
+//                document.finishPage(page);
+
+            }
+//            saveToDirectory(document1);
+            document1.close();
+            Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            openPdf(filename);
+                        }
+                    }).show();
+            uris.clear();
+            adapter.notifyDataSetChanged();
+
+            Log.i("pdf", document1.toString());
+
+        }
+        catch (Exception e) {
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.i("error", e.getMessage());
+        }
+
+
+    }
+    private void saveToDirectory(Document document)  {
         final String filename;
         File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
@@ -179,11 +281,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         Log.i("HomePath",dir.toString()+filename.toString());
         File file=new File(dir,filename);
         try {
-
-            OutputStream outputStream=new FileOutputStream(file);
-            document.writeTo(outputStream);
-            outputStream.flush();
-            refreshList.sendName(filename);
+            PdfWriter.getInstance(document,new FileOutputStream(dir+"/"+filename));
             Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
                     new View.OnClickListener() {
                         @Override
@@ -273,75 +371,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     }
 
 
-    private void createPdf()  {
 
-        try {
-            PdfDocument document = new PdfDocument();
-            for (int i = 0; i < uris.size(); i++)
-            {
-
-                WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                Display display = wm.getDefaultDisplay();
-                DisplayMetrics displaymetrics = new DisplayMetrics();
-                activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-                float height = displaymetrics.heightPixels ;
-                float width = displaymetrics.widthPixels ;
-                int convertHeight = (int) height, convertWidth = (int) width;
-                Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(i)));
-                PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(convertWidth, convertHeight, 1).create();
-                PdfDocument.Page page = document.startPage(pageInfo);
-                Canvas canvas = page.getCanvas();
-                Paint paint = new Paint();
-                canvas.drawPaint(paint);
-                int newHeigth,newWidth;
-                float heightdp=sample.getHeight()* Resources.getSystem().getDisplayMetrics().density;
-                int hpx=(int)heightdp;
-                float widthdp=sample.getWidth()* Resources.getSystem().getDisplayMetrics().density;
-                int wpx=(int)widthdp;
-
-                Log.i("height",String.valueOf(hpx));
-                Log.i("convert height", String.valueOf(convertHeight));
-                if(convertHeight>hpx)
-                {
-                    newHeigth=hpx;
-                    if(hpx<1500)
-                    {
-                        newHeigth=1500;
-                    }
-                }
-                else {
-                    newHeigth=convertHeight;
-                }
-                if(convertWidth>wpx)
-                {
-                    newWidth=wpx;
-                    if(wpx<1500)
-                    {
-                        newWidth=1200;
-                    }
-                }
-                else {
-                    newWidth=convertWidth;
-                }
-                Bitmap bitmap=Bitmap.createScaledBitmap(sample,newWidth,newHeigth,true);
-                paint.setColor(Color.BLUE);
-                canvas.drawBitmap(bitmap,0,0,null);
-
-                document.finishPage(page);
-            }
-            saveToDirectory(document);
-            document.close();
-
-            Log.i("pdf", document.toString());
-
-        }
-        catch (Exception e) {
-            Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
-            Log.i("error", e.getMessage());
-        }
-
-
-    }
 
     public interface RefreshList {
         void sendName(String name);
