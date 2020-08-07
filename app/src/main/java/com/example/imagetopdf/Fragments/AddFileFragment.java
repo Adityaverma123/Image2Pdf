@@ -70,6 +70,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -94,6 +95,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     SharedPreferences.Editor editor;
     Dialog dialog;
     FrameLayout parent;
+    ProgressDialog progressDialog;
     Context context;
     Activity activity;
     ImageView add_image;
@@ -114,6 +116,7 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
+        progressDialog=new ProgressDialog(context);
         handler=new Handler(context.getMainLooper());
         progressBar=view.findViewById(R.id.progress_bar);
         createPdf = view.findViewById(R.id.createPdfBtn);
@@ -183,58 +186,75 @@ public class AddFileFragment extends Fragment implements OnChangePic {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progressBar.setVisibility(View.VISIBLE);
+            progressDialog.setTitle("Converting");
+            progressDialog.setMessage("Please Wait..App is converting your images to Pdf");
+            //progressBar.setVisibility(View.VISIBLE);
+            progressDialog.show();
+
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+
+
+//            progressBar.setProgress(values[0]);
+
         }
 
         @Override
         protected String doInBackground(Void... voids) {
-            final String filename;
-            try {
-                File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-                File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
-                if(!dir.exists())
-                {
-                    dir.mkdir();
-                }
-                filename=System.currentTimeMillis()+".pdf";
+
+
+
+                try {
+
+                    final String filename;
+                    File filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+                    File dir = new File(filePath.getAbsolutePath() + "/Image2Pdf");
+                    if (!dir.exists()) {
+                        dir.mkdir();
+                    }
+                    filename = System.currentTimeMillis() + ".pdf";
 //            PdfDocument document = new PdfDocument();
-                Document document1=new Document();
-                PdfWriter.getInstance(document1,new FileOutputStream(dir+"/"+filename));
-                document1.open();
-                for (int i = 0; i < uris.size(); i++)
-                {
+                    Document document1 = new Document();
+                    PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
+                    document1.open();
+                    for (int j = 0; j < uris.size(); j++) {
+                        document1.newPage();
+                        Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(j)));
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        sample.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        Image image = Image.getInstance(stream.toByteArray());
+                        float scaler = ((document1.getPageSize().getWidth() - document1.leftMargin()
+                                - document1.rightMargin() - 0) / image.getWidth()) * 100;
+                        image.scalePercent(scaler);
+                        image.setAlignment(Image.ALIGN_CENTER | Image.ALIGN_TOP);
+                        document1.add(image);
 
-                    document1.newPage();
-                    Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(i)));
-                    ByteArrayOutputStream stream=new ByteArrayOutputStream();
-                    sample.compress(Bitmap.CompressFormat.PNG,100,stream);
-                    Image image=Image.getInstance(stream.toByteArray());
-                    float scaler = ((document1.getPageSize().getWidth() - document1.leftMargin()
-                            - document1.rightMargin() - 0) / image.getWidth()) * 100;
-                    image.scalePercent(scaler);
-                    image.setAlignment(Image.ALIGN_CENTER|Image.ALIGN_TOP);
-                    document1.add(image);
+                    }
+                    document1.close();
+                    Log.i("pdf", document1.toString());
                     return filename;
-                }
-                document1.close();
 
-            } catch (Exception e) {
-                e.printStackTrace();
-                return e.getMessage();
-            }
-            return null;
+
+                } catch (Exception e) {
+                    Log.i("error", e.getMessage());
+                    return e.getMessage();
+
+                }
         }
 
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            progressBar.setVisibility(View.GONE);
-            final String filename=s;
+            //progressBar.setProgress(0);
+            //progressBar.setVisibility(View.GONE);
+            progressDialog.dismiss();
             if(s!=null)
             {
+                final String filename=s;
                 refreshList.sendName(filename);
-                uris.clear();
-                adapter.notifyDataSetChanged();
                 Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
                         new View.OnClickListener() {
                             @Override
@@ -242,12 +262,16 @@ public class AddFileFragment extends Fragment implements OnChangePic {
                                 openPdf(filename);
                             }
                         }).show();
+                uris.clear();
+                adapter.notifyDataSetChanged();
 
             }
         }
     }
     private void createPdf()  {
+
         progressBar.setVisibility(View.VISIBLE);
+
 
         progressBar.setVisibility(View.GONE);
 
