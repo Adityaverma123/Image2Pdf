@@ -92,7 +92,7 @@ public class ListFragments extends Fragment {
         if(name!=null) {
             refreshLayout.setRefreshing(false);
             Log.i("name", name);
-            names.add(name);
+            names.add(0,name);
             adapter.notifyItemInserted(names.size());
             saveData();
             preferences.edit().clear().apply();
