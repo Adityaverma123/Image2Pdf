@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -102,7 +103,9 @@ public class    AddFileFragment extends Fragment implements OnChangePic {
     Activity activity;
     ImageView add_image;
     ProgressBar progressBar;
-    Handler handler;
+    @SuppressLint("HandlerLeak")
+
+    int progress=0;
    private int fromPos = -1;
     private int toPos = -1;
     public AddFileFragment(Context context)
@@ -120,8 +123,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic {
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
-        progressDialog=new ProgressDialog(context);
-        handler=new Handler(context.getMainLooper());
         progressBar=view.findViewById(R.id.progress_bar);
         createPdf = view.findViewById(R.id.createPdfBtn);
         sharedPreferences=context.getSharedPreferences("home2List",Context.MODE_PRIVATE);
@@ -134,9 +135,10 @@ public class    AddFileFragment extends Fragment implements OnChangePic {
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
+
                     if(uris.size()>0) {
-                        CreatePdf createPdf=new CreatePdf();
-                        createPdf.execute();
+
+                        createPdf();
                     }
                     else {
                         Toast.makeText(context,"Please Add Images",Toast.LENGTH_SHORT).show();
@@ -306,44 +308,70 @@ public class    AddFileFragment extends Fragment implements OnChangePic {
             }
         }
     }
+    private String filename;
     private void createPdf()  {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-        progressBar.setVisibility(View.VISIBLE);
+                    File filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+                    File dir = new File(filePath.getAbsolutePath() + "/Image2Pdf");
+                    if (!dir.exists()) {
+                        dir.mkdir();
+                    }
+                    filename = System.currentTimeMillis() + ".pdf";
+//            PdfDocument document = new PdfDocument();
+                    Document document1 = new Document();
+                    PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
+                    document1.open();
+                    for (int j = 0; j < uris.size(); j++) {
+                        document1.newPage();
+                        Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(j)));
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        sample.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        Image image = Image.getInstance(stream.toByteArray());
+                        float scaler = ((document1.getPageSize().getWidth() - document1.leftMargin()
+                                - document1.rightMargin() - 0) / image.getWidth()) * 100;
+                        image.scalePercent(scaler);
+                        image.setAlignment(Image.ALIGN_CENTER | Image.ALIGN_TOP);
+                        document1.add(image);
+
+                    }
+                    document1.close();
+                    Log.i("pdf", document1.toString());
+
+                } catch (Exception e) {
+                    Log.i("error", e.getMessage());
+
+                }
+            }
+        }).run();
 
 
-        progressBar.setVisibility(View.GONE);
-
-
+        dismissDialog();
+        refreshList.sendName(filename);
+        Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        openPdf(filename);
+                    }
+                }).show();
+        uris.clear();
+        adapter.notifyDataSetChanged();
     }
-    private void saveToDirectory(Document document)  {
-        final String filename;
-        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
-        if(!dir.exists())
-        {
-            dir.mkdir();
-        }
-        filename=System.currentTimeMillis()+".pdf";
-        Log.i("HomePath",dir.toString()+filename.toString());
-        File file=new File(dir,filename);
-        try {
-            PdfWriter.getInstance(document,new FileOutputStream(dir+"/"+filename));
-            Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            openPdf(filename);
-                        }
-                    }).show();
-            uris.clear();
-            adapter.notifyDataSetChanged();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
-        }
-
-
+    private void dismissDialog()
+    {
+        progressDialog.dismiss();
+    }
+    private void showProgressDialog() {
+        progressDialog=new ProgressDialog(context);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setMessage("Please Wait..App is converting your images to Pdf");
+        progressDialog.show();
     }
 
 
