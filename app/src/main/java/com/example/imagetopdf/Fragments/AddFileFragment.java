@@ -43,12 +43,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
 
 import com.example.imagetopdf.Adapters.ImageAdapter;
 import com.example.imagetopdf.Adapters.OnChangePic;
@@ -77,7 +79,7 @@ import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
-public class AddFileFragment extends Fragment implements OnChangePic {
+public class    AddFileFragment extends Fragment implements OnChangePic {
     private List<Uri> uris;
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
@@ -94,13 +96,15 @@ public class AddFileFragment extends Fragment implements OnChangePic {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     Dialog dialog;
-    FrameLayout parent;
+    ConstraintLayout parent;
     ProgressDialog progressDialog;
     Context context;
     Activity activity;
     ImageView add_image;
     ProgressBar progressBar;
     Handler handler;
+   private int fromPos = -1;
+    private int toPos = -1;
     public AddFileFragment(Context context)
     {
         this.context=context;
@@ -161,26 +165,60 @@ public class AddFileFragment extends Fragment implements OnChangePic {
 
         });
         recyclerView = view.findViewById(R.id.recycler_view);
+
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, 0) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                int fromPositon = viewHolder.getAdapterPosition();
-                int toPosition = target.getAdapterPosition();
-                Collections.swap(uris, fromPositon, toPosition);
-                adapter.notifyItemMoved(fromPositon, toPosition);
+                toPos=target.getAdapterPosition();
                 return false;
+            }
+
+            @Override
+            public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
+                switch (actionState) {
+                    case ItemTouchHelper.ACTION_STATE_DRAG: {
+                        fromPos = viewHolder.getAdapterPosition();
+                        break;
+                    }
+
+                    case ItemTouchHelper.ACTION_STATE_IDLE: {
+                        //Execute when the user dropped the item after dragging.
+                        if (fromPos != -1 && toPos != -1
+                                && fromPos != toPos) {
+                            moveItem(fromPos, toPos);
+                            fromPos = -1;
+                            toPos = -1;
+                        }
+                        break;
+                    }
+                }
             }
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
             }
+
+            @Override
+            public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+                return makeFlag(ItemTouchHelper.ACTION_STATE_DRAG, ItemTouchHelper.DOWN | ItemTouchHelper.UP | ItemTouchHelper.START | ItemTouchHelper.END);
+            }
+
         });
         itemTouchHelper.attachToRecyclerView(recyclerView);
         GridLayoutManager manager = new GridLayoutManager(context, 3);
         recyclerView.setLayoutManager(manager);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(20);
         recyclerView.setAdapter(adapter);
         return view;
+    }
+    private void moveItem(int oldPos, int newPos) {
+        Uri temp = uris.get(oldPos);
+        uris.set(oldPos, uris.get(newPos));
+        uris.set(newPos, temp);
+        adapter.notifyItemChanged(oldPos);
+        adapter.notifyItemChanged(newPos);
     }
     public class CreatePdf extends AsyncTask<Void,Integer,String>{
         @Override

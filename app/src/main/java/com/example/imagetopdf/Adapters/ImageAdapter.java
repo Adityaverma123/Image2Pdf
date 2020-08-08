@@ -83,6 +83,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
             }
         });
     }
+
     private void startCrop(int position) {
         setCropNo(position);
       Intent intent= CropImage.activity(uris.get(position))
