@@ -225,8 +225,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic {
         protected void onPreExecute() {
             super.onPreExecute();
             progressDialog.setTitle("Converting");
-            progressDialog.setMessage("Please Wait..App is converting your images to Pdf");
-            //progressBar.setVisibility(View.VISIBLE);
+            progressDialog.setMessage("Please Wait..");
             progressDialog.show();
 
         }
@@ -254,7 +253,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic {
                         dir.mkdir();
                     }
                     filename = System.currentTimeMillis() + ".pdf";
-//            PdfDocument document = new PdfDocument();
                     Document document1 = new Document();
                     PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
                     document1.open();
@@ -315,38 +313,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic {
 
 
     }
-    private void saveToDirectory(Document document)  {
-        final String filename;
-        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
-        if(!dir.exists())
-        {
-            dir.mkdir();
-        }
-        filename=System.currentTimeMillis()+".pdf";
-        Log.i("HomePath",dir.toString()+filename.toString());
-        File file=new File(dir,filename);
-        try {
-            PdfWriter.getInstance(document,new FileOutputStream(dir+"/"+filename));
-            Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            openPdf(filename);
-                        }
-                    }).show();
-            uris.clear();
-            adapter.notifyDataSetChanged();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(context,e.getMessage(),Toast.LENGTH_SHORT).show();
-        }
-
-
-    }
-
-
     private void openPdf(String filename) {
         Intent intent=new Intent(Intent.ACTION_VIEW);
         File file=getImageFile(filename);
