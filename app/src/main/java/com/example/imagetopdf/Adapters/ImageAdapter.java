@@ -4,25 +4,23 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.imagetopdf.Fragments.AddFileFragment;
+import com.example.imagetopdf.Interface.OnChangePic;
+import com.example.imagetopdf.Interface.Visibility;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
-
 
 import java.util.List;
 
@@ -35,7 +33,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     List<Uri>cropUri;
     OnChangePic onChangePic;
     OnItemClickListener onItemClickListener;
-
+    Visibility visibility;
 
     public int getCropNo() {
         return cropNo;
@@ -46,9 +44,9 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     }
 
     Activity activity;
-    public ImageAdapter(Context context,List<Uri>uris,OnItemClickListener onItemClickListener)
-
+    public ImageAdapter(Context context,List<Uri>uris,OnItemClickListener onItemClickListener,Visibility visibility)
     {
+        this.visibility=visibility;
         this.onItemClickListener=onItemClickListener;
         this.cropUri=cropUri;
         this.context=context;
@@ -102,7 +100,14 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        return uris.size();
+        if(uris.size()==0){
+            visibility.setVisibility(false);
+            return 0;
+        }
+        else {
+            visibility.setVisibility(true);
+            return uris.size();
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{

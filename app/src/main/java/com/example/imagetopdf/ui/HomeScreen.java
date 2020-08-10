@@ -43,8 +43,9 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.imagetopdf.Adapters.ImageAdapter;
-import com.example.imagetopdf.Adapters.OnChangePic;
+import com.example.imagetopdf.Interface.OnChangePic;
 import com.example.imagetopdf.BuildConfig;
+import com.example.imagetopdf.Interface.Visibility;
 import com.example.imagetopdf.Model.PdfModel;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
@@ -164,6 +165,11 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
                 }
             }
 
+        }, new Visibility() {
+            @Override
+            public void setVisibility(Boolean b) {
+
+            }
         });
         recyclerView = findViewById(R.id.recycler_view);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, 0) {

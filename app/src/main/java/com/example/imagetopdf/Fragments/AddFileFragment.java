@@ -6,39 +6,26 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -51,15 +38,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SortedList;
 
 import com.example.imagetopdf.Adapters.ImageAdapter;
-import com.example.imagetopdf.Adapters.OnChangePic;
 import com.example.imagetopdf.BuildConfig;
+import com.example.imagetopdf.Interface.OnChangePic;
+import com.example.imagetopdf.Interface.Visibility;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
-import com.example.imagetopdf.ui.HomeScreen;
-import com.example.imagetopdf.ui.PdfLists;
 import com.google.android.material.snackbar.Snackbar;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
@@ -72,15 +57,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
-public class    AddFileFragment extends Fragment implements OnChangePic {
+public class    AddFileFragment extends Fragment implements OnChangePic, Visibility {
     private List<Uri> uris;
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
@@ -166,7 +148,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic {
                 }
             }
 
-        });
+        },this);
         recyclerView = view.findViewById(R.id.recycler_view);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, 0) {
@@ -223,6 +205,13 @@ public class    AddFileFragment extends Fragment implements OnChangePic {
         adapter.notifyItemChanged(oldPos);
         adapter.notifyItemChanged(newPos);
     }
+
+    @Override
+    public void setVisibility(Boolean b) {
+      createPdf.setVisibility(b?View.VISIBLE:View.GONE);
+
+    }
+
     private class CreatePdfThread extends Thread{
         @Override
         public void run() {
@@ -408,10 +397,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic {
     }
 
 
-    private void openSource() {
-
-        CropImage.activity().setGuidelines(CropImageView.Guidelines.ON).start(activity);
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
