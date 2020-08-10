@@ -12,6 +12,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,12 +22,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -49,6 +55,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.parser.Line;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -85,6 +92,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     Activity activity;
     ImageView add_image;
     ProgressBar progressBar;
+    Button cancel;
     @SuppressLint("HandlerLeak")
 
     int progress=0;
@@ -306,17 +314,28 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
 
     private void showDialog()
     {
-        dialog=new Dialog(context);
+
+        dialog=new Dialog(context,android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.select_image_dialog);
-        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        ImageView camera=dialog.findViewById(R.id.camera);
-        ImageView  gallery=dialog.findViewById(R.id.galley);
+        dialog.setCanceledOnTouchOutside(false);
+        Window window=dialog.getWindow();
+        WindowManager.LayoutParams wlp = window.getAttributes();
+        wlp.gravity = Gravity.BOTTOM;
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        window.setAttributes(wlp);
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        LinearLayout camera=dialog.findViewById(R.id.camera);
+        LinearLayout  gallery=dialog.findViewById(R.id.galley);
+         cancel=dialog.findViewById(R.id.cancelBtn);
         dialog.show();
+        add_image.setVisibility(View.GONE);
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
-
+                    add_image.setVisibility(View.VISIBLE);
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
 
@@ -335,9 +354,18 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
 
                 } else {
+                    add_image.setVisibility(View.VISIBLE);
                     Log.i("Click", "Gallery clicked");
                     openGallery();
                 }
+            }
+        });
+        cancel.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                add_image.setVisibility(View.VISIBLE);
+                dialog.dismiss();
             }
         });
 
