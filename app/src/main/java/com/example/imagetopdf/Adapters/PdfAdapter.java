@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -59,7 +61,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
             holder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -95,7 +97,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             holder.delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    deleteItem(v, position);
+                    deleteItem(holder.itemView, position);
                 }
             });
             holder.pdfName.setText(names.get(position));
@@ -131,32 +133,30 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         File file=new File(dir,fileName);
         return file;
     }
-    private void deleteItem(View rowView,int position)
+    private void deleteItem(View rowView, final int position)
     {
-        Animation fadeIn = new AlphaAnimation(0, 1);
-        fadeIn.setInterpolator(new DecelerateInterpolator()); //add this
-        fadeIn.setDuration(1000);
+        AlphaAnimation anim = new AlphaAnimation(1.0f, 0.0f);
+        anim.setDuration(500);
+        rowView.startAnimation(anim);
 
-        Animation fadeOut = new AlphaAnimation(1, 0);
-        fadeOut.setInterpolator(new AccelerateInterpolator()); //and this
-        fadeOut.setStartOffset(1000);
-        fadeOut.setDuration(1000);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                final int pos=position;
+                names.remove(pos);
+                notifyItemRemoved(pos);
+                notifyDataSetChanged();
+                SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+                preferences.edit().clear().apply();
 
-        AnimationSet animation = new AnimationSet(false); //change to false
-        animation.addAnimation(fadeIn);
-        animation.addAnimation(fadeOut);
-        rowView.setAnimation(animation);
-        names.remove(position);
-        notifyItemRemoved(position);
-        notifyDataSetChanged();
-        SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
-        preferences.edit().clear().apply();
+                SharedPreferences.Editor editor=preferences.edit();
+                Gson gson=new Gson();
+                String json=gson.toJson(names);
+                editor.putString("task_list",json);
+                editor.apply();
+            }
+        },anim.getDuration());
 
-        SharedPreferences.Editor editor=preferences.edit();
-        Gson gson=new Gson();
-        String json=gson.toJson(names);
-        editor.putString("task_list",json);
-        editor.apply();
 
     }
 
@@ -186,6 +186,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 layout = itemView.findViewById(R.id.pdf_Layout);
                 delete = itemView.findViewById(R.id.delete);
                 share = itemView.findViewById(R.id.share);
+
 
 
         }

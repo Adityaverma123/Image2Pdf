@@ -3,6 +3,7 @@ package com.example.imagetopdf.ui;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
@@ -31,6 +32,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -74,55 +76,33 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
 
     String currentPhotoPath = "";
     Uri path;
-    ImageView addGallery;
     List<Uri> cropUris;
-    Button button;
-    ImageView createPdf;
+    ImageView add_picture;
     int positionOfCrop;
     List<String> pdfs;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     ProgressDialog progressDialog;
-    LinearLayout parent;
+    RelativeLayout parent;
     Intent intent;
+    Dialog dialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
-        addFileBtn = findViewById(R.id.addFileBtn);
-        parent=findViewById(R.id.parent);
-        button=findViewById(R.id.open_files);
-
-        progressDialog=new ProgressDialog(this);
+        parent = findViewById(R.id.parent);
+        progressDialog = new ProgressDialog(this);
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
-        createPdf = findViewById(R.id.createPdfBtn);
-        sharedPreferences=getSharedPreferences("home2List",Context.MODE_PRIVATE);
-        editor=sharedPreferences.edit();
-        createPdf.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        add_picture = findViewById(R.id.add_picture);
+        sharedPreferences = getSharedPreferences("home2List", Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
 
-                if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
-                } else {
-                    if(uris.size()>0) {
-                        createPdf();
-                    }
-                    else {
-                        Toast.makeText(HomeScreen.this,"Please Add Images",Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-        });
-        button.setOnClickListener(new View.OnClickListener() {
+        add_picture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                 intent=new Intent(HomeScreen.this,PdfLists.class);
-
-                startActivity(intent);
+                showDialog();
             }
         });
 //        addGallery.setOnClickListener(new View.OnClickListener() {
@@ -185,15 +165,8 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
         GridLayoutManager manager = new GridLayoutManager(this, 3);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
-        addFileBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openSource();
-            }
-        });
     }
     private void saveToDirectory(PdfDocument document)  {
-           dismissDialog();
         final String filename;
                 File filePath= this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
@@ -229,6 +202,44 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
 
     }
 
+    private void showDialog()
+    {
+        dialog=new Dialog(this);
+        dialog.setContentView(R.layout.select_image_dialog);
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        ImageView camera=dialog.findViewById(R.id.camera);
+        ImageView  gallery=dialog.findViewById(R.id.galley);
+        dialog.show();
+        camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+
+                    if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
+
+                    } else
+                        openCamera();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        gallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ActivityCompat.checkSelfPermission(HomeScreen.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
+
+                } else {
+                    Log.i("Click", "Gallery clicked");
+                    openGallery();
+                }
+            }
+        });
+
+    }
 
     private void openPdf(String filename) {
         Intent intent=new Intent(Intent.ACTION_VIEW);
@@ -260,15 +271,6 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
         return file;
     }
 
-    private void showDialog()
-    {
-        progressDialog.show();
-        progressDialog.setMessage("Please wait...");
-    }
-    private void dismissDialog()
-    {
-        progressDialog.dismiss();
-    }
 
     private void createPdf()  {
 
@@ -302,7 +304,6 @@ public class HomeScreen extends AppCompatActivity implements OnChangePic, Serial
 
         }
         catch (Exception e) {
-            dismissDialog();
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.i("error", e.getMessage());
             }
