@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -59,7 +60,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
             holder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -95,7 +96,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             holder.delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    deleteItem(v, position);
+                    deleteItem(holder.itemView, position);
                 }
             });
             holder.pdfName.setText(names.get(position));
@@ -131,32 +132,28 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         File file=new File(dir,fileName);
         return file;
     }
-    private void deleteItem(View rowView,int position)
+    private void deleteItem(View rowView,final int position)
     {
-        Animation fadeIn = new AlphaAnimation(0, 1);
-        fadeIn.setInterpolator(new DecelerateInterpolator()); //add this
-        fadeIn.setDuration(1000);
+        AlphaAnimation animation=new AlphaAnimation(1.0f,0.0f);
+        animation.setDuration(500);
+        rowView.startAnimation(animation);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                names.remove(position);
+                notifyItemRemoved(position);
+                notifyDataSetChanged();
+                SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+                preferences.edit().clear().apply();
 
-        Animation fadeOut = new AlphaAnimation(1, 0);
-        fadeOut.setInterpolator(new AccelerateInterpolator()); //and this
-        fadeOut.setStartOffset(1000);
-        fadeOut.setDuration(1000);
+                SharedPreferences.Editor editor=preferences.edit();
+                Gson gson=new Gson();
+                String json=gson.toJson(names);
+                editor.putString("task_list",json);
+                editor.apply();
+            }
+        },animation.getDuration());
 
-        AnimationSet animation = new AnimationSet(false); //change to false
-        animation.addAnimation(fadeIn);
-        animation.addAnimation(fadeOut);
-        rowView.setAnimation(animation);
-        names.remove(position);
-        notifyItemRemoved(position);
-        notifyDataSetChanged();
-        SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
-        preferences.edit().clear().apply();
-
-        SharedPreferences.Editor editor=preferences.edit();
-        Gson gson=new Gson();
-        String json=gson.toJson(names);
-        editor.putString("task_list",json);
-        editor.apply();
 
     }
 
