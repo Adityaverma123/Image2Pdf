@@ -3,6 +3,7 @@ package com.example.imagetopdf.ui;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -11,6 +12,8 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
@@ -30,14 +33,18 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
     ViewPager viewPager;
     AddFileFragment fileFragment;
     ListFragments listFragments;
-    private BottomNavigationView navView;
+    Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         tabLayout = findViewById(R.id.tablayout);
         viewPager = findViewById(R.id.view_pager);
-        navView=findViewById(R.id.nav_view);
+        toolbar=findViewById(R.id.toolbar2);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("");
         ViewPagerAdapter adapter=new ViewPagerAdapter(getSupportFragmentManager());
          fileFragment=new AddFileFragment(MainActivity.this);
          listFragments=new ListFragments(MainActivity.this);
@@ -47,47 +54,14 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(2);
         tabLayout.setupWithViewPager(viewPager);
-        navView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if (item.getItemId() == R.id.nav_add) {
-                    viewPager.setCurrentItem(0);
-                }
-                if (item.getItemId() == R.id.nav_list) {
-                    viewPager.setCurrentItem(1);
-                }
-                if(item.getItemId()==R.id.nav_settings)
-                {
-                    Intent intent=new Intent(getApplicationContext(),SettingsActivity.class);
-                    startActivity(intent);
-                }
-                return true;
 
-            }
-        });
-       viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-           @Override
-           public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+    }
 
-           }
-
-           @Override
-           public void onPageSelected(int position) {
-                if(position==0)
-                {
-                    navView.setSelectedItemId(R.id.nav_add);
-                }
-                if(position==1)
-                {
-                    navView.setSelectedItemId(R.id.nav_list);
-                }
-           }
-
-           @Override
-           public void onPageScrollStateChanged(int state) {
-
-           }
-       });
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.bottom_nav_menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

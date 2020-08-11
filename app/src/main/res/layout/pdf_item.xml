@@ -10,7 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#CC000000"
+        android:background="#CCFFFFFF"
         android:orientation="horizontal">
 
 
@@ -41,7 +41,7 @@
 
         <LinearLayout
             android:padding="5dp"
-            android:background="#E6000000"
+            android:background="#E6FFFFFF"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -55,9 +55,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:paddingStart="10dp"
-                android:textSize="17sp"
+                android:textSize="15sp"
                 android:fontFamily="@font/caviar_dreams"
-                android:textColor="@color/white"
+                android:textColor="@android:color/black"
                 tools:text="1234455.pdf"/>
 
         </LinearLayout>
