@@ -324,6 +324,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
 
         wlp.gravity = Gravity.BOTTOM;
         wlp.y=150;
+        wlp.windowAnimations=R.style.DialogAnimation;
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.setAttributes(wlp);
         window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
