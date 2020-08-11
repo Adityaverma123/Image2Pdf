@@ -125,15 +125,9 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
-
-                    if(uris.size()>0) {
                     progressDialog=ProgressDialog.show(context,"Converting","Please Wait...");
                         CreatePdfThread thread=new CreatePdfThread();
                         thread.start();
-                    }
-                    else {
-                        Toast.makeText(context,"Please Add Images",Toast.LENGTH_SHORT).show();
-                    }
                 }
             }
 
@@ -269,7 +263,8 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
 
                 progressDialog.dismiss();
                 final String filename=(String)msg.obj;
-                refreshList.sendName(filename);
+                refreshList.sendName(filename,uris.get(0).toString());
+
                 Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
                         new View.OnClickListener() {
                             @Override
@@ -378,7 +373,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
 
 
     public interface RefreshList {
-        void sendName(String name);
+        void sendName(String name,String uri);
     }
 
     @Override

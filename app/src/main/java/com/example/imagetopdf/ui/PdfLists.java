@@ -43,6 +43,7 @@ public class PdfLists extends AppCompatActivity implements Serializable {
     SharedPreferences.Editor editor;
     PdfAdapter adapter;
     List<String>names;
+    List<String>uris;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +60,7 @@ public class PdfLists extends AppCompatActivity implements Serializable {
     private void buildRecyclerView() {
         recyclerView = findViewById(R.id.pdf_list);
         recyclerView.setHasFixedSize(true);
-        adapter=new PdfAdapter(this,names);
+        adapter=new PdfAdapter(this,names,uris);
         LinearLayoutManager manager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);

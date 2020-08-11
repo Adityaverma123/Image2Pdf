@@ -40,10 +40,12 @@ import java.util.List;
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     Context context;
     List<String >names;
+    List<String >uris;
     private static final int TYPE_HEAD=0;
     private static final int TYPE_LIST=1;
-    public PdfAdapter(Context context, List<String>names)
+    public PdfAdapter(Context context, List<String>names,List<String>uris)
     {
+        this.uris=uris;
         this.context=context;
         this.names=names;
     }
@@ -52,7 +54,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
 
-           View view = LayoutInflater.from(context).inflate(R.layout.pdf_list_item, parent, false);
+           View view = LayoutInflater.from(context).inflate(R.layout.pdf_item, parent, false);
             return new ViewHolder(view);
 
 
@@ -99,7 +101,8 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                     deleteItem(holder.itemView, position);
                 }
             });
-            holder.pdfName.setText(names.get(position));
+            holder.list_name.setText(names.get(position));
+            holder.list_image.setImageURI(Uri.parse(uris.get(position)));
             holder.share.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -149,7 +152,9 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 SharedPreferences.Editor editor=preferences.edit();
                 Gson gson=new Gson();
                 String json=gson.toJson(names);
+                String image=gson.toJson(uris);
                 editor.putString("task_list",json);
+                editor.putString("task_image",image);
                 editor.apply();
             }
         },animation.getDuration());
@@ -171,18 +176,20 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        TextView pdfName;
+        TextView list_name;
         LinearLayout layout;
         ImageView delete;
         ImageView share;
+        ImageView list_image;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-                pdfName = itemView.findViewById(R.id.pdf_name);
-                layout = itemView.findViewById(R.id.pdf_Layout);
-                delete = itemView.findViewById(R.id.delete);
-                share = itemView.findViewById(R.id.share);
+                list_name = itemView.findViewById(R.id.list_name);
+                layout = itemView.findViewById(R.id.pdf_viewer);
+                delete = itemView.findViewById(R.id.pdf_delete);
+                share = itemView.findViewById(R.id.pdf_share);
+                list_image=itemView.findViewById(R.id.list_image);
 
 
         }

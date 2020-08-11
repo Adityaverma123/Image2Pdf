@@ -91,11 +91,13 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
     }
 
     @Override
-    public void sendName(String name) {
+    public void sendName(String name,String uri) {
         String tag = "android:switcher:" + R.id.view_pager   + ":" + 1;
         ListFragments f=(ListFragments)getSupportFragmentManager().findFragmentByTag(tag);
-        f.addReceivedName(name);
+        f.addReceivedName(name,uri);
     }
+
+
 
     private class ViewPagerAdapter extends FragmentPagerAdapter {
         ArrayList<String> fragmentTitleList=new ArrayList<>();
