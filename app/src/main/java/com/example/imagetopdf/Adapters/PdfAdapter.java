@@ -1,7 +1,9 @@
 package com.example.imagetopdf.Adapters;
 
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -96,7 +98,23 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             holder.delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    deleteItem(holder.itemView, position);
+                    AlertDialog.Builder dialog=new AlertDialog.Builder(context);
+                    dialog.setTitle("Delete Item");
+                    dialog.setMessage("Do you really want to delete this Pdf?")
+
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    deleteItem(holder.itemView, position);
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            }).show();
+
                 }
             });
             holder.pdfName.setText(names.get(position));
@@ -134,6 +152,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
     private void deleteItem(View rowView,final int position)
     {
+
         AlphaAnimation animation=new AlphaAnimation(1.0f,0.0f);
         animation.setDuration(500);
         rowView.startAnimation(animation);
@@ -153,6 +172,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 editor.apply();
             }
         },animation.getDuration());
+
 
 
     }
