@@ -7,75 +7,72 @@
     app:cardCornerRadius="10dp"
     android:elevation="5dp"
     app:cardUseCompatPadding="true">
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/pdf_viewer"
+        android:layout_margin="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#CC000000"
         android:orientation="horizontal">
-
-
-    <LinearLayout
-        android:id="@+id/pdf_viewer"
-        android:layout_width="250dp"
-        android:padding="5dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
         <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
+            android:id="@+id/card_image"
+            android:layout_width="wrap_content"
+            android:backgroundTint="#CCFFFFFF"
             android:layout_height="wrap_content"
             app:cardCornerRadius="5dp"
-            app:cardUseCompatPadding="true">
+            android:elevation="2dp">
 
 
         <ImageView
+            android:layout_margin="5dp"
             android:id="@+id/list_image"
-            android:layout_width="match_parent"
-            android:scaleType="centerCrop"
-            android:layout_height="100dp"/>
+            android:layout_width="100dp"
+            android:layout_height="150dp"
+            android:scaleType="fitXY"/>
         </androidx.cardview.widget.CardView>
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="5dp">
-
-
         <LinearLayout
             android:padding="5dp"
-            android:background="#E6000000"
-            android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="5dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <ImageView
+            android:layout_toEndOf="@+id/card_image"
+            android:orientation="vertical">
+            <TextView
+
+                android:id="@+id/list_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/pdf_image"/>
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:text="123456.pdf"
+                android:fontFamily="@font/caviar_dreams"/>
             <TextView
-                android:id="@+id/list_name"
-                android:layout_width="match_parent"
+                android:id="@+id/list_date"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:paddingStart="10dp"
-                android:textSize="17sp"
+                android:text="October 2018"
                 android:fontFamily="@font/caviar_dreams"
-                android:textColor="@color/white"
-                tools:text="1234455.pdf"/>
-
+                android:layout_marginTop="10dp"/>
         </LinearLayout>
-        </androidx.cardview.widget.CardView>
-    </LinearLayout>
-        <ImageView
-            android:id="@+id/pdf_share"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:src="@drawable/share"
-            android:layout_gravity="center_vertical"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:orientation="vertical">
+
+
         <ImageView
             android:id="@+id/pdf_delete"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:src="@drawable/delete"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="10dp"/>
-    </LinearLayout>
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/delete"/>
+            <ImageView
+                android:id="@+id/pdf_share"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/share"/>
+        </LinearLayout>
 
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>

@@ -35,7 +35,12 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     Context context;
@@ -93,8 +98,8 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                     }
                 }
 
-
             });
+            holder.list_date.setText(getDate());
             holder.delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -102,6 +107,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 }
             });
             holder.list_name.setText(names.get(position));
+
             holder.list_image.setImageURI(Uri.parse(uris.get(position)));
             holder.share.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -155,6 +161,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 String image=gson.toJson(uris);
                 editor.putString("task_list",json);
                 editor.putString("task_image",image);
+                editor.putString("date",getDate());
                 editor.apply();
             }
         },animation.getDuration());
@@ -174,13 +181,25 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     public int getItemCount() {
         return names.size();
     }
+    private String getDate()
+    {
+        Calendar calendar=Calendar.getInstance();
+        String month=calendar.getDisplayName(Calendar.MONTH,Calendar.SHORT, Locale.getDefault());
+        String year=String.valueOf(calendar.get(Calendar.YEAR));
+        String date=String.valueOf(calendar.get(Calendar.DATE));
+        SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor=preferences.edit();
+        editor.putString("date",date+" "+month+" "+year);
+        return date+" "+month+" "+year;
+    }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         TextView list_name;
-        LinearLayout layout;
+        RelativeLayout layout;
         ImageView delete;
         ImageView share;
         ImageView list_image;
+        TextView list_date;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -190,6 +209,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 delete = itemView.findViewById(R.id.pdf_delete);
                 share = itemView.findViewById(R.id.pdf_share);
                 list_image=itemView.findViewById(R.id.list_image);
+                list_date=itemView.findViewById(R.id.list_date);
 
 
         }
