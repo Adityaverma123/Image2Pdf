@@ -33,8 +33,11 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public class ListFragments extends Fragment {
@@ -46,6 +49,8 @@ public class ListFragments extends Fragment {
     PdfAdapter adapter;
     List<String>names;
     List<String>uris;
+    List<String>dates;
+    List<String>times;
     String type="showfiles";
     Context context;
     SwipeRefreshLayout refreshLayout;
@@ -82,7 +87,7 @@ public class ListFragments extends Fragment {
     private void buildRecyclerView(View view) {
         recyclerView = view.findViewById(R.id.pdf_list);
         recyclerView.setHasFixedSize(true);
-        adapter=new PdfAdapter(context,names,uris);
+        adapter=new PdfAdapter(context,names,uris,dates,times);
         LinearLayoutManager manager=new LinearLayoutManager(context);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
@@ -96,12 +101,30 @@ public class ListFragments extends Fragment {
             Log.i("name", name);
             names.add(0,name);
             uris.add(0,uri);
+            dates.add(0,getDate());
+            times.add(0,getTime());
             adapter.notifyItemInserted(names.size());
             saveData();
             preferences.edit().clear().apply();
         }
 
     }
+    private String getDate()
+    {
+        Calendar calendar=Calendar.getInstance();
+        String month=calendar.getDisplayName(Calendar.MONTH,Calendar.SHORT, Locale.getDefault());
+        String year=String.valueOf(calendar.get(Calendar.YEAR));
+        String date=String.valueOf(calendar.get(Calendar.DATE));
+        return date+" "+month+" "+year;
+    }
+    private String getTime()
+    {
+        SimpleDateFormat df = new SimpleDateFormat("hh:mm a");
+        Calendar currentDateTime = Calendar.getInstance();
+        String  currentTime = df.format(currentDateTime.getTime());
+        return currentTime;
+    }
+
     private void saveData()
     {
         sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
@@ -109,8 +132,12 @@ public class ListFragments extends Fragment {
         Gson gson=new Gson();
         String json=gson.toJson(names);
         String image=gson.toJson(uris);
+        String date=gson.toJson(dates);
+        String time=gson.toJson(times);
         editor.putString("task_list",json);
         editor.putString("task_image",image);
+        editor.putString("task_date",date);
+        editor.putString("task_time",time);
         editor.apply();
     }
 
@@ -122,6 +149,8 @@ public class ListFragments extends Fragment {
         Gson gson=new Gson();
         String json=sharedPreferences.getString("task_list",null);
         String image=sharedPreferences.getString("task_image",null);
+        String date=sharedPreferences.getString("task_date",null);
+        String time=sharedPreferences.getString("task_time",null);
 
         Type type=new TypeToken<ArrayList<String>>(){}.getType();
         names=gson.fromJson(json,type);
@@ -134,6 +163,18 @@ public class ListFragments extends Fragment {
         if(uris==null)
         {
             uris=new ArrayList<>();
+        }
+        Type typeDate=new TypeToken<ArrayList<String>>(){}.getType();
+        dates=gson.fromJson(date,typeDate);
+        if(dates==null)
+        {
+            dates=new ArrayList<>();
+        }
+        Type typeTime=new TypeToken<ArrayList<String>>(){}.getType();
+        times=gson.fromJson(time,typeTime);
+        if(times==null)
+        {
+            times=new ArrayList<>();
         }
     }
 

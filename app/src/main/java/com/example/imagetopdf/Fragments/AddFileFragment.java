@@ -91,7 +91,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     Context context;
     Activity activity;
     ImageView add_image;
-    ProgressBar progressBar;
+    ImageView backgroundImage;
     Button cancel;
     @SuppressLint("HandlerLeak")
 
@@ -113,7 +113,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
-        progressBar=view.findViewById(R.id.progress_bar);
+       // backgroundImage=view.findViewById(R.id.background_image);
         createPdf = view.findViewById(R.id.createPdfBtn);
         sharedPreferences=context.getSharedPreferences("home2List",Context.MODE_PRIVATE);
         editor=sharedPreferences.edit();
@@ -211,6 +211,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     @Override
     public void setVisibility(Boolean b) {
       createPdf.setVisibility(b?View.VISIBLE:View.GONE);
+      //backgroundImage.setVisibility(b?View.GONE:View.VISIBLE);
 
     }
 

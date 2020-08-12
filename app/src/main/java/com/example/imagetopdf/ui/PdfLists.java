@@ -44,6 +44,8 @@ public class PdfLists extends AppCompatActivity implements Serializable {
     PdfAdapter adapter;
     List<String>names;
     List<String>uris;
+    List<String>times;
+    List<String>dates;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +62,7 @@ public class PdfLists extends AppCompatActivity implements Serializable {
     private void buildRecyclerView() {
         recyclerView = findViewById(R.id.pdf_list);
         recyclerView.setHasFixedSize(true);
-        adapter=new PdfAdapter(this,names,uris);
+        adapter=new PdfAdapter(this,names,uris,dates,times);
         LinearLayoutManager manager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);

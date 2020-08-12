@@ -1,7 +1,9 @@
 package com.example.imagetopdf.Adapters;
 
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -37,6 +39,7 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -46,10 +49,12 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     Context context;
     List<String >names;
     List<String >uris;
-    private static final int TYPE_HEAD=0;
-    private static final int TYPE_LIST=1;
-    public PdfAdapter(Context context, List<String>names,List<String>uris)
+    List<String>dates;
+    List<String>times;
+    public PdfAdapter(Context context, List<String>names,List<String>uris,List<String>dates,List<String>times)
     {
+        this.times=times;
+        this.dates=dates;
         this.uris=uris;
         this.context=context;
         this.names=names;
@@ -99,15 +104,32 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 }
 
             });
-            holder.list_date.setText(getDate());
+            holder.list_date.setText(dates.get(position));
+            holder.list_time.setText(times.get(position));
             holder.delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    deleteItem(holder.itemView, position);
+                    AlertDialog.Builder dialog=new AlertDialog.Builder(context);
+                    dialog.setTitle("Delete Item");
+                    dialog.setMessage("Do you really want to delete this Pdf?")
+
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    deleteItem(holder.itemView, position);
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            }).show();
+
                 }
+
             });
             holder.list_name.setText(names.get(position));
-
             holder.list_image.setImageURI(Uri.parse(uris.get(position)));
             holder.share.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -150,6 +172,9 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             @Override
             public void run() {
                 names.remove(position);
+                dates.remove(position);
+                uris.remove(position);
+                times.remove(position);
                 notifyItemRemoved(position);
                 notifyDataSetChanged();
                 SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
@@ -159,9 +184,13 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 Gson gson=new Gson();
                 String json=gson.toJson(names);
                 String image=gson.toJson(uris);
+                String date=gson.toJson(dates);
+                String time=gson.toJson(times);
                 editor.putString("task_list",json);
                 editor.putString("task_image",image);
-                editor.putString("date",getDate());
+                editor.putString("task_date",date);
+                editor.putString("task_time",time);
+
                 editor.apply();
             }
         },animation.getDuration());
@@ -181,17 +210,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     public int getItemCount() {
         return names.size();
     }
-    private String getDate()
-    {
-        Calendar calendar=Calendar.getInstance();
-        String month=calendar.getDisplayName(Calendar.MONTH,Calendar.SHORT, Locale.getDefault());
-        String year=String.valueOf(calendar.get(Calendar.YEAR));
-        String date=String.valueOf(calendar.get(Calendar.DATE));
-        SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor=preferences.edit();
-        editor.putString("date",date+" "+month+" "+year);
-        return date+" "+month+" "+year;
-    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         TextView list_name;
@@ -200,6 +219,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         ImageView share;
         ImageView list_image;
         TextView list_date;
+        TextView list_time;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -210,6 +230,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 share = itemView.findViewById(R.id.pdf_share);
                 list_image=itemView.findViewById(R.id.list_image);
                 list_date=itemView.findViewById(R.id.list_date);
+                list_time=itemView.findViewById(R.id.list_time);
 
 
         }
