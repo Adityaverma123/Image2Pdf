@@ -332,10 +332,10 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                add_image.setVisibility(View.VISIBLE);
                 try {
-                    add_image.setVisibility(View.VISIBLE);
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
+                       requestPermissions(new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
 
                     } else
                         openCamera();
@@ -349,7 +349,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
             @Override
             public void onClick(View v) {
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
+                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
 
                 } else {
                     add_image.setVisibility(View.VISIBLE);
@@ -484,28 +484,30 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         }
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == Constants.PICK_IMAGE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == Constants.PICK_IMAGE && grantResults[0] == PackageManager.PERMISSION_GRANTED)
             {
+                add_image.setVisibility(View.VISIBLE);
                 try {
                     openCamera();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        }
+
         if (requestCode == Constants.OPENGALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             openGallery();
+            add_image.setVisibility(View.VISIBLE);
         }
+
     }
 
     @Override
     public void startCrop(Uri uri, int requestcode) {
         Intent intent = CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
-                .setActivityTitle("Crop")
+
                 .getIntent(context);
         startActivityForResult(intent, requestcode);
     }
