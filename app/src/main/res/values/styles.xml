@@ -14,6 +14,10 @@
         <item name="android:fontFamily">@font/caviar_dreams</item>a
         <item name="android:textSize">19sp</item>
     </style>
+    <style name="customfontstyletab" parent="@android:style/TextAppearance.Small">
+        <item name="android:fontFamily">@font/caviar_dreams</item>a
+        <item name="android:textSize">27sp</item>
+    </style>
 
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
 

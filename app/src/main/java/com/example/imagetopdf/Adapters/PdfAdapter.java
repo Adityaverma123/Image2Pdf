@@ -37,6 +37,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -154,8 +155,6 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
     private File getImageFile(int position) {
 
-
-
         File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
 
@@ -197,7 +196,6 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
 
     }
-
 
     @Override
     public int getItemViewType(int position) {
