@@ -67,6 +67,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import hotchemi.android.rate.AppRate;
+
 import static android.app.Activity.RESULT_OK;
 
 public class    AddFileFragment extends Fragment implements OnChangePic, Visibility {
@@ -128,6 +130,11 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                     progressDialog=ProgressDialog.show(context,"Converting","Please Wait...");
                         CreatePdfThread thread=new CreatePdfThread();
                         thread.start();
+                    AppRate.with(context).setInstallDays(1)
+                            .setLaunchTimes(3)
+                            .setRemindInterval(2)
+                            .monitor();
+                    AppRate.showRateDialogIfMeetsConditions(activity);
                 }
             }
 
@@ -277,6 +284,8 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 adapter.notifyDataSetChanged();
             }
         };
+
+
     }
     private void openPdf(String filename) {
         Intent intent=new Intent(Intent.ACTION_VIEW);
