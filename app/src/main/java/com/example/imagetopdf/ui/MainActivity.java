@@ -10,7 +10,9 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -59,6 +61,25 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
         MenuInflater menuInflater=getMenuInflater();
         menuInflater.inflate(R.menu.bottom_nav_menu,menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId())
+        {
+            case R.id.menu_rate:
+                try {
+
+                    startActivity(new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("market://details?id=" + "com.android.chrome")));
+                }
+                catch (ActivityNotFoundException e)
+                {
+                    startActivity(new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("http://play.google.com/store/apps/details?id=" +"com.android.chrome")));
+                }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
