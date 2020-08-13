@@ -13,8 +13,20 @@
     <style name="customfontstyle" parent="@android:style/TextAppearance.Small">
         <item name="android:fontFamily">@font/caviar_dreams</item>a
         <item name="android:textSize">19sp</item>
-    </style>
 
+    </style>
+    <style name="customfontstylexxxhdpi" parent="@android:style/TextAppearance.Small">
+    <item name="android:fontFamily">@font/caviar_dreams</item>a
+    <item name="android:textSize">21sp</item>
+    </style>
+    <style name="customfontstylexhdpi" parent="@android:style/TextAppearance.Small">
+        <item name="android:fontFamily">@font/caviar_dreams</item>a
+        <item name="android:textSize">19sp</item>
+    </style>
+    <style name="customfontstylexxhdpi" parent="@android:style/TextAppearance.Small">
+        <item name="android:fontFamily">@font/caviar_dreams</item>a
+        <item name="android:textSize">21sp</item>
+    </style>
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
 
 
