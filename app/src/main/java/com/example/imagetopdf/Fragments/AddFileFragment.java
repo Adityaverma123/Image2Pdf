@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hotchemi.android.rate.AppRate;
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -205,6 +206,13 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(20);
         recyclerView.setAdapter(adapter);
+        new MaterialShowcaseView.Builder(activity)
+                .setTarget(add_image)
+                .setDismissOnTargetTouch(true)
+                .setDismissOnTouch(true)
+                .setContentText("Add images by clicking on this button")
+                .singleUse(Constants.SHOWCASE_ID)
+                .show();
         return view;
     }
     private void moveItem(int oldPos, int newPos) {
@@ -217,11 +225,18 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
 
     @Override
     public void setVisibility(Boolean b) {
-      createPdf.setVisibility(b?View.VISIBLE:View.GONE);
-      //backgroundImage.setVisibility(b?View.GONE:View.VISIBLE);
-
+        if (b) {
+            createPdf.setVisibility(View.VISIBLE);
+            new MaterialShowcaseView.Builder(activity)
+                    .setTarget(createPdf)
+                    .setDismissOnTargetTouch(true)
+                    .setDismissOnTouch(true)
+                    .setContentText("Generate Pdf by clicking on this button")
+                    .singleUse(Constants.SHOWCASE_PDF)
+                    .show();
+        }
+        else createPdf.setVisibility(View.GONE);
     }
-
     private class CreatePdfThread extends Thread{
         @Override
         public void run() {
@@ -287,6 +302,16 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
 
 
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(uris.size()!=0)
+        {
+            uris.clear();
+        }
+    }
+
     private void openPdf(String filename) {
         Intent intent=new Intent(Intent.ACTION_VIEW);
         File file=getImageFile(filename);

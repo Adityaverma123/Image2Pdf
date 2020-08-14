@@ -152,6 +152,13 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             });
 
     }
+    private void deleteFile(String filename)
+    {
+        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+        File file=new File(dir,filename);
+        file.delete();
+    }
 
     private File getImageFile(int position) {
 
@@ -170,10 +177,13 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                deleteFile(names.get(position));
                 names.remove(position);
                 dates.remove(position);
                 uris.remove(position);
                 times.remove(position);
+
+
                 notifyItemRemoved(position);
                 notifyDataSetChanged();
                 SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
@@ -206,8 +216,10 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
+
         return names.size();
     }
+
 
 
     public class ViewHolder extends RecyclerView.ViewHolder{
