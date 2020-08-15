@@ -17,7 +17,6 @@ public class Constants {
     public static final String BUNDLE_RECYCLER_LAYOUT="recycler_layout";
     public static final String SHOWCASE_ID="showcase_id";
     public static final String SHOWCASE_PDF="showcase_pdf";
-    public static final String SHOWCASE_DELETE="showcase_delete";
-    public static final String SHOWCASE_SHARE="showcase_share";
+    public static final String FIRST_TIME="first_time";
 
 }

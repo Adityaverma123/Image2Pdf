@@ -73,13 +73,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/share_new"/>
+                android:src="@drawable/ic_share_black_30dp"/>
 
         <ImageView
             android:id="@+id/pdf_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/delete_new"/>
+            android:src="@drawable/ic_delete_black_24dp"/>
 
         </LinearLayout>
 

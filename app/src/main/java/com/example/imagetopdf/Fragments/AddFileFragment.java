@@ -66,6 +66,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import hotchemi.android.rate.AppRate;
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
@@ -95,6 +96,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     Activity activity;
     ImageView add_image;
     ImageView backgroundImage;
+    List<String>quotes;
     Button cancel;
     @SuppressLint("HandlerLeak")
 
@@ -116,11 +118,19 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
+        quotes=new ArrayList<>();
+        quotes.add("Patience is bitter, but its fruit is sweet. \n -Jean-Jacques Rousseau");
+        quotes.add("Patience is the key to your Pdf :p \n -Aditya Verma");
+        quotes.add("Come what may, all bad fortune is to be conquered by endurance.\n -Virgil");
+        quotes.add("No, I will be the pattern of all patience; I will say nothing. \n William Shakespeare");
+        quotes.add("If I have done the public any service, it is due to my patient thought. \n-Isaac Newton" );
+        quotes.add("Heaven grant us patience with a man in love.\n -Rudyard Kipling");
+        quotes.add("Patience is a virtue, and I'm learning patience. It's a tough lesson. \n-Elon Musk");
+        quotes.add("Patience is necessary, and one cannot reap immediately where one has sown. \n-Soren Kierkegaard");
+        quotes.add("Life is really simple, but we insist on making it complicated.\n -Confucius");
        // backgroundImage=view.findViewById(R.id.background_image);
         createPdf = view.findViewById(R.id.createPdfBtn);
-        sharedPreferences=context.getSharedPreferences("home2List",Context.MODE_PRIVATE);
-        editor=sharedPreferences.edit();
-
+        sharedPreferences=context.getSharedPreferences(Constants.FIRST_TIME,Context.MODE_PRIVATE);
         createPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -128,6 +138,8 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
+                    Random random=new Random();
+                    int title=random.nextInt(8);
                     progressDialog=ProgressDialog.show(context,"Converting","Please Wait...");
                         CreatePdfThread thread=new CreatePdfThread();
                         thread.start();
