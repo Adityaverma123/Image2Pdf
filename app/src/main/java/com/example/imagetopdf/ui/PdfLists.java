@@ -24,7 +24,6 @@ import com.example.imagetopdf.Adapters.PdfAdapter;
 import com.example.imagetopdf.Model.PdfModel;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
-import com.example.imagetopdf.Utils.ObjectSerializer;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

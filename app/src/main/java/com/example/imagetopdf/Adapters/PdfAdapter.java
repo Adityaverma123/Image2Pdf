@@ -31,6 +31,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
 import com.google.android.material.snackbar.Snackbar;
@@ -131,7 +132,8 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
             });
             holder.list_name.setText(names.get(position));
-            holder.list_image.setImageURI(Uri.parse(uris.get(position)));
+        Glide.with(context).load(Uri.parse(uris.get(position))).into(holder.list_image);
+           // holder.list_image.setImageURI(Uri.parse(uris.get(position)));
             holder.share.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

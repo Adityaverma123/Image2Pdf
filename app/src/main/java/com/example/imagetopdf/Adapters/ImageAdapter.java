@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.imagetopdf.Interface.OnChangePic;
 import com.example.imagetopdf.Interface.Visibility;
 import com.example.imagetopdf.R;
@@ -63,7 +64,8 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        holder.imageView.setImageURI(uris.get(position));
+        //holder.imageView.setImageURI(uris.get(position));
+        Glide.with(context).load(uris.get(position)).into(holder.imageView);
         holder.imageNo.setText("Image "+(position+1));
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override

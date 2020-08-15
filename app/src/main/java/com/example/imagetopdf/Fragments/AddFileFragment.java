@@ -54,6 +54,7 @@ import com.example.imagetopdf.Utils.Constants;
 import com.google.android.material.snackbar.Snackbar;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.parser.Line;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -99,9 +100,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     List<String>quotes;
     Button cancel;
     @SuppressLint("HandlerLeak")
-
-    int progress=0;
-   private int fromPos = -1;
+    private int fromPos = -1;
     private int toPos = -1;
     public AddFileFragment(Context context)
     {
@@ -140,7 +139,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 } else {
                     Random random=new Random();
                     int title=random.nextInt(8);
-                    progressDialog=ProgressDialog.show(context,"Converting","Please Wait...");
+                   // progressDialog=ProgressDialog.show(context,"Converting","Please Wait...");
                         CreatePdfThread thread=new CreatePdfThread();
                         thread.setPriority(Thread.MAX_PRIORITY);
                         thread.start();
@@ -268,16 +267,21 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
                 document1.open();
                 for (int j = 0; j < uris.size(); j++) {
-                    document1.newPage();
-                    Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(j)));
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    sample.compress(Bitmap.CompressFormat.PNG, 70, stream);
-                    Image image = Image.getInstance(stream.toByteArray());
+                    int quality=30;
+                    double qualitymode=quality*0.9;
+                    Image image=Image.getInstance(String.valueOf(uris.get(j)));
+                    image.setCompressionLevel((int) qualitymode);
+                    image.setBorder(Rectangle.BOX);
+                    image.setBorderWidth(0);
                     float scaler = ((document1.getPageSize().getWidth() - document1.leftMargin()
                             - document1.rightMargin() - 0) / image.getWidth()) * 100;
                     image.scalePercent(scaler);
+//                    float pageWidth = document1.getPageSize().getWidth() - (50 + 38);
+//                    float pageHeight = document1.getPageSize().getHeight() - (38 + 50);
+//                    image.scaleAbsolute(pageWidth,pageHeight);
                     image.setAlignment(Image.ALIGN_CENTER | Image.ALIGN_TOP);
                     document1.add(image);
+                    document1.newPage();
 
                 }
                 Message message=Message.obtain();
@@ -298,7 +302,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
             @Override
             public void handleMessage(Message msg) {
 
-                progressDialog.dismiss();
+                //progressDialog.dismiss();
                 final String filename=(String)msg.obj;
                 refreshList.sendName(filename,uris.get(0).toString());
 
