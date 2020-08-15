@@ -15,6 +15,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -78,7 +79,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
     RefreshList refreshList;
-
+    File dir;
     String currentPhotoPath = "";
     Uri path;
     ImageView addGallery;
@@ -98,6 +99,8 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     ImageView backgroundImage;
     List<String>quotes;
     Button cancel;
+    String  filename;
+
     @SuppressLint("HandlerLeak")
 
     int progress=0;
@@ -119,6 +122,12 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         cropUris = new ArrayList<>();
         pdfs = new ArrayList<>();
         quotes=new ArrayList<>();
+
+        File filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        dir = new File(filePath.getAbsolutePath() + "/Image2Pdf");
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
         quotes.add("Patience is bitter, but its fruit is sweet. \n -Jean-Jacques Rousseau");
         quotes.add("Patience is the key to your Pdf :p \n -Aditya Verma");
         quotes.add("Come what may, all bad fortune is to be conquered by endurance.\n -Virgil");
@@ -138,11 +147,60 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
-                    Random random=new Random();
-                    int title=random.nextInt(8);
-                    progressDialog=ProgressDialog.show(context,"Converting","Please Wait...");
-                        CreatePdfThread thread=new CreatePdfThread();
-                        thread.start();
+                   // Random random=new Random();
+                   // int title=random.nextInt(8);
+                    //progressDialog=ProgressDialog.show(context,"Converting","Please Wait...");
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                filename = System.currentTimeMillis() + ".pdf";
+//            PdfDocument document = new PdfDocument();
+                                Document document1 = new Document();
+                                PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
+                                document1.open();
+                                for (int j = 0; j < uris.size(); j++) {
+                                    document1.newPage();
+                                    Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(j)));
+                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                    sample.compress(Bitmap.CompressFormat.PNG, 70, stream);
+                                    Image image = Image.getInstance(stream.toByteArray());
+                                    float scaler = ((document1.getPageSize().getWidth() - document1.leftMargin()
+                                            - document1.rightMargin() - 0) / image.getWidth()) * 100;
+                                    image.scalePercent(scaler);
+                                    image.setAlignment(Image.ALIGN_CENTER | Image.ALIGN_TOP);
+                                    document1.add(image);
+                                }
+                                document1.close();
+                                //Log.i("pdf", document1.toString());
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+
+                            }
+
+                        }
+                    });
+                   // progressDialog.dismiss();
+
+                    if(filename!=null)
+
+                    {
+                        refreshList.sendName(filename, uris.get(0).toString());
+
+                        Snackbar.make(parent, "Pdf saved", Snackbar.LENGTH_LONG).setAction("Open",
+                                new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        openPdf(filename);
+                                    }
+                                }).show();
+                        uris.clear();
+                        adapter.notifyDataSetChanged();
+                    }
+//                        CreatePdfThread thread=new CreatePdfThread();
+//                        thread.setPriority(Thread.MAX_PRIORITY);
+//                        thread.start();
                     AppRate.with(context).setInstallDays(1)
                             .setLaunchTimes(3)
                             .setRemindInterval(2)
@@ -256,11 +314,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
             try {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-                File filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-                File dir = new File(filePath.getAbsolutePath() + "/Image2Pdf");
-                if (!dir.exists()) {
-                    dir.mkdir();
-                }
               String  filename = System.currentTimeMillis() + ".pdf";
 //            PdfDocument document = new PdfDocument();
                 Document document1 = new Document();
