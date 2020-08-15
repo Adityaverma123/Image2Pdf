@@ -142,6 +142,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                     int title=random.nextInt(8);
                     progressDialog=ProgressDialog.show(context,"Converting","Please Wait...");
                         CreatePdfThread thread=new CreatePdfThread();
+                        thread.setPriority(Thread.MAX_PRIORITY);
                         thread.start();
                     AppRate.with(context).setInstallDays(1)
                             .setLaunchTimes(3)

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -23,6 +24,7 @@ import com.example.imagetopdf.Fragments.AddFileFragment;
 import com.example.imagetopdf.Fragments.ListFragments;
 import com.example.imagetopdf.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
     AddFileFragment fileFragment;
     ListFragments listFragments;
     Toolbar toolbar;
+    ConstraintLayout main_layout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
         tabLayout = findViewById(R.id.tablayout);
         viewPager = findViewById(R.id.view_pager);
         toolbar=findViewById(R.id.toolbar1);
+        main_layout=findViewById(R.id.main_layout);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
         ViewPagerAdapter adapter=new ViewPagerAdapter(getSupportFragmentManager());
@@ -77,6 +81,16 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
                 {
                     startActivity(new Intent(Intent.ACTION_VIEW,
                             Uri.parse("http://play.google.com/store/apps/details?id=" +"com.android.chrome")));
+                }
+            case R.id.menu_tc:
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW,
+                                    Uri.parse("https://pdfkaro.blogspot.com/p/pdf-karo-terms-conditions.html"))
+                            );
+                }
+                catch (Exception e)
+                {
+                    Snackbar.make(main_layout,e.getMessage(),Snackbar.LENGTH_SHORT).show();
                 }
         }
         return super.onOptionsItemSelected(item);
