@@ -210,7 +210,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 .setTarget(add_image)
                 .setDismissOnTargetTouch(true)
                 .setDismissOnTouch(true)
-                .setContentText("Add images by clicking on this button")
+                .setContentText("This button will allow you to add images from camera or gallery")
                 .singleUse(Constants.SHOWCASE_ID)
                 .show();
         return view;
