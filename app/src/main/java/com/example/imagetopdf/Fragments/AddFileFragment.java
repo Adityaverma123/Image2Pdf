@@ -220,9 +220,10 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         recyclerView.setAdapter(adapter);
         new MaterialShowcaseView.Builder(activity)
                 .setTarget(add_image)
+                .setDelay(600)
                 .setDismissOnTargetTouch(true)
                 .setDismissOnTouch(true)
-                .setContentText("This button will allow you to add images from camera or gallery")
+                .setContentText("This button will allow you to add images from camera and gallery")
                 .singleUse(Constants.SHOWCASE_ID)
                 .show();
         return view;
@@ -269,7 +270,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                     document1.newPage();
                     Bitmap sample = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(uris.get(j)));
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    sample.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    sample.compress(Bitmap.CompressFormat.PNG, 70, stream);
                     Image image = Image.getInstance(stream.toByteArray());
                     float scaler = ((document1.getPageSize().getWidth() - document1.leftMargin()
                             - document1.rightMargin() - 0) / image.getWidth()) * 100;
