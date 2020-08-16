@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
                 {
                     Intent intent=new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
-                String shareBody="Checkout this awesome app, This app converts Images to Pdf with a single click!   App link:-"
+                String shareBody="Hey, Checkout this awesome app, This app converts Images to Pdf with a single click!   App link:-"
                         + "http://play.google.com/store/apps/details?id="+getPackageName();
                 String shareSub="Pdf Karo";
                 intent.putExtra(Intent.EXTRA_SUBJECT,shareSub);
