@@ -43,7 +43,6 @@ public class ListFragments extends Fragment {
     RecyclerView recyclerView;
     List<PdfDocument> pdfLists;
     SharedPreferences sharedPreferences;
-    SharedPreferences preferences;
     SharedPreferences.Editor editor;
     PdfAdapter adapter;
     List<String>names;
@@ -53,16 +52,15 @@ public class ListFragments extends Fragment {
     String type="showfiles";
     Context context;
     SwipeRefreshLayout refreshLayout;
-    public ListFragments(Context context)
+    public ListFragments()
     {
-        this.context=context;
+
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-       View  view = inflater.inflate(R.layout.fragment_list_fragments, container, false);preferences = context.getSharedPreferences("home2List", Context.MODE_PRIVATE);
-        final String name = preferences.getString("name", null);
-
+       View  view = inflater.inflate(R.layout.fragment_list_fragments, container, false);
+        context=view.getContext();
         refreshLayout=view.findViewById(R.id.swipe_refresh);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -104,7 +102,6 @@ public class ListFragments extends Fragment {
             times.add(0,getTime());
             adapter.notifyItemInserted(names.size());
             saveData();
-            preferences.edit().clear().apply();
         }
 
     }

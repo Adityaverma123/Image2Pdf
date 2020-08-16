@@ -184,9 +184,8 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 dates.remove(position);
                 uris.remove(position);
                 times.remove(position);
-
-
                 notifyItemRemoved(position);
+                notifyItemRangeChanged(position,names.size());
                 notifyDataSetChanged();
                 SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
                 preferences.edit().clear().apply();
@@ -201,8 +200,8 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 editor.putString("task_image",image);
                 editor.putString("task_date",date);
                 editor.putString("task_time",time);
-
                 editor.apply();
+                notifyDataSetChanged();
             }
         },animation.getDuration());
 

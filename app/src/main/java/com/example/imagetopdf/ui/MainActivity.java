@@ -50,9 +50,8 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
         ViewPagerAdapter adapter=new ViewPagerAdapter(getSupportFragmentManager());
-         fileFragment=new AddFileFragment(MainActivity.this);
-         listFragments=new ListFragments(MainActivity.this);
-
+         fileFragment=new AddFileFragment();
+         listFragments=new ListFragments();
         adapter.addFragment(fileFragment,"Add File");
         adapter.addFragment(listFragments,"Your Pdfs");
         viewPager.setAdapter(adapter);
@@ -75,12 +74,12 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
                 try {
 
                     startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("market://details?id=" + "com.android.chrome")));
+                            Uri.parse("market://details?id=" + getPackageName())));
                 }
                 catch (ActivityNotFoundException e)
                 {
                     startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://play.google.com/store/apps/details?id=" +"com.android.chrome")));
+                            Uri.parse("http://play.google.com/store/apps/details?id="+getPackageName())));
                 }
             case R.id.menu_tc:
                 try {
@@ -91,6 +90,22 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
                 catch (Exception e)
                 {
                     Snackbar.make(main_layout,e.getMessage(),Snackbar.LENGTH_SHORT).show();
+                }
+            case R.id.menu_share:
+                try
+                {
+                    Intent intent=new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                String shareBody="Checkout this awesome app, This app converts Images to Pdf with a single click!   App link:-"
+                        + "http://play.google.com/store/apps/details?id="+getPackageName();
+                String shareSub="Pdf Karo";
+                intent.putExtra(Intent.EXTRA_SUBJECT,shareSub);
+                intent.putExtra(Intent.EXTRA_TEXT,shareBody);
+                startActivity(Intent.createChooser(intent,"Share Using"));
+                }
+                catch (Exception e)
+                {
+                    Snackbar.make(main_layout,"Some error occured, Please try again later.",Snackbar.LENGTH_SHORT).show();
                 }
         }
         return super.onOptionsItemSelected(item);

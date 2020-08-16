@@ -79,7 +79,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
     RefreshList refreshList;
-
     String currentPhotoPath = "";
     Uri path;
     ImageView addGallery;
@@ -102,9 +101,9 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     @SuppressLint("HandlerLeak")
     private int fromPos = -1;
     private int toPos = -1;
-    public AddFileFragment(Context context)
+    public AddFileFragment()
     {
-        this.context=context;
+
     }
     @SuppressLint("CommitPrefEdits")
     @Override
@@ -116,6 +115,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         add_image=view.findViewById(R.id.add_image);
         uris = new ArrayList<>();
         cropUris = new ArrayList<>();
+        context=view.getContext();
         pdfs = new ArrayList<>();
         quotes=new ArrayList<>();
         quotes.add("Patience is bitter, but its fruit is sweet. \n -Jean-Jacques Rousseau");
@@ -302,7 +302,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
             @Override
             public void handleMessage(Message msg) {
 
-                //progressDialog.dismiss();
                 final String filename=(String)msg.obj;
                 refreshList.sendName(filename,uris.get(0).toString());
 
@@ -456,11 +455,11 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         File file = getImageFile();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) // 2
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             path = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID.concat(".provider"), file);
         else
             path = Uri.fromFile(file); // 3
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, path); // 4
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
         startActivityForResult(intent, Constants.PICK_IMAGE);
     }
 
