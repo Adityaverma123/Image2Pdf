@@ -1,47 +1,34 @@
 package com.example.imagetopdf.Fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.pdf.PdfDocument;
-import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.example.imagetopdf.Adapters.PdfAdapter;
-import com.example.imagetopdf.Model.PdfModel;
 import com.example.imagetopdf.R;
 import com.example.imagetopdf.Utils.Constants;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 public class ListFragments extends Fragment {
     RecyclerView recyclerView;
-    List<PdfDocument> pdfLists;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     PdfAdapter adapter;
@@ -49,7 +36,6 @@ public class ListFragments extends Fragment {
     List<String>uris;
     List<String>dates;
     List<String>times;
-    String type="showfiles";
     Context context;
     SwipeRefreshLayout refreshLayout;
     public ListFragments()
@@ -70,8 +56,6 @@ public class ListFragments extends Fragment {
         });
         loadData();
         buildRecyclerView(view);
-//        insertData(name);
-
         return view;
     }
 

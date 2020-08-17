@@ -81,22 +81,13 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     RefreshList refreshList;
     String currentPhotoPath = "";
     Uri path;
-    ImageView addGallery;
-    List<Uri> cropUris;
-    Button button;
     ImageView createPdf;
     int positionOfCrop;
-    List<String> pdfs;
-    SharedPreferences sharedPreferences;
-    SharedPreferences.Editor editor;
     Dialog dialog;
     ConstraintLayout parent;
-    ProgressDialog progressDialog;
     Context context;
     Activity activity;
     ImageView add_image;
-    ImageView backgroundImage;
-    List<String>quotes;
     Button cancel;
     @SuppressLint("HandlerLeak")
     private int fromPos = -1;
@@ -114,22 +105,9 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         parent=view.findViewById(R.id.parent);
         add_image=view.findViewById(R.id.add_image);
         uris = new ArrayList<>();
-        cropUris = new ArrayList<>();
+
         context=view.getContext();
-        pdfs = new ArrayList<>();
-        quotes=new ArrayList<>();
-        quotes.add("Patience is bitter, but its fruit is sweet. \n -Jean-Jacques Rousseau");
-        quotes.add("Patience is the key to your Pdf :p \n -Aditya Verma");
-        quotes.add("Come what may, all bad fortune is to be conquered by endurance.\n -Virgil");
-        quotes.add("No, I will be the pattern of all patience; I will say nothing. \n William Shakespeare");
-        quotes.add("If I have done the public any service, it is due to my patient thought. \n-Isaac Newton" );
-        quotes.add("Heaven grant us patience with a man in love.\n -Rudyard Kipling");
-        quotes.add("Patience is a virtue, and I'm learning patience. It's a tough lesson. \n-Elon Musk");
-        quotes.add("Patience is necessary, and one cannot reap immediately where one has sown. \n-Soren Kierkegaard");
-        quotes.add("Life is really simple, but we insist on making it complicated.\n -Confucius");
-       // backgroundImage=view.findViewById(R.id.background_image);
         createPdf = view.findViewById(R.id.createPdfBtn);
-        sharedPreferences=context.getSharedPreferences(Constants.FIRST_TIME,Context.MODE_PRIVATE);
         createPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -137,9 +115,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
-                    Random random=new Random();
-                    int title=random.nextInt(8);
-                   // progressDialog=ProgressDialog.show(context,"Converting","Please Wait...");
+
                         CreatePdfThread thread=new CreatePdfThread();
                         thread.setPriority(Thread.MAX_PRIORITY);
                         thread.start();
@@ -189,7 +165,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                     }
 
                     case ItemTouchHelper.ACTION_STATE_IDLE: {
-                        //Execute when the user dropped the item after dragging.
                         if (fromPos != -1 && toPos != -1
                                 && fromPos != toPos) {
                             moveItem(fromPos, toPos);
@@ -262,7 +237,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                     dir.mkdir();
                 }
               String  filename = System.currentTimeMillis() + ".pdf";
-//            PdfDocument document = new PdfDocument();
                 Document document1 = new Document();
                 PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
                 document1.open();
@@ -276,9 +250,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                     float scaler = ((document1.getPageSize().getWidth() - document1.leftMargin()
                             - document1.rightMargin() - 0) / image.getWidth()) * 100;
                     image.scalePercent(scaler);
-//                    float pageWidth = document1.getPageSize().getWidth() - (50 + 38);
-//                    float pageHeight = document1.getPageSize().getHeight() - (38 + 50);
-//                    image.scaleAbsolute(pageWidth,pageHeight);
                     image.setAlignment(Image.ALIGN_CENTER | Image.ALIGN_TOP);
                     document1.add(image);
                     document1.newPage();
@@ -485,7 +456,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 try {
                     Uri imageUri = result.getUri();
                     uris.add(imageUri);
-                    cropUris.add(imageUri);
                     InputStream input = context.getContentResolver().openInputStream(imageUri);
                     Bitmap bitmap = BitmapFactory.decodeStream(input);
                     Log.i("imageuri", imageUri.toString());
@@ -500,7 +470,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
 
             }
         } else if (requestCode == Constants.PICK_IMAGE && resultCode == RESULT_OK) {
-//            Uri uri=data.getData();
             Uri uri = Uri.parse(currentPhotoPath);
 
             startCrop(uri, Constants.CROP_CAMERA);
@@ -521,7 +490,6 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
             if (resultCode == RESULT_OK) {
 
                 Uri imageUri = result.getUri();
-                cropUris.add(imageUri);
                 Log.i("cropped uri", imageUri.toString());
                 uris.set(positionOfCrop, imageUri);
                 adapter.notifyItemChanged(positionOfCrop);

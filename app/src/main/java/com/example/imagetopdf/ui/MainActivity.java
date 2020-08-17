@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
          fileFragment=new AddFileFragment();
          listFragments=new ListFragments();
         adapter.addFragment(fileFragment,"Add File");
-        adapter.addFragment(listFragments,"Your Pdfs");
+        adapter.addFragment(listFragments,"Your PDFs");
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(2);
         tabLayout.setupWithViewPager(viewPager);
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements AddFileFragment.R
                 {
                     Intent intent=new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
-                String shareBody="Hey, Checkout this awesome app, This app converts Images to Pdf with a single click!   App link:-"
+                String shareBody="Hey! \nLooking for an app to convert your images to Pdf with a single click? Check out  the PDF Karo app now! "
                         + "http://play.google.com/store/apps/details?id="+getPackageName();
                 String shareSub="Pdf Karo";
                 intent.putExtra(Intent.EXTRA_SUBJECT,shareSub);
