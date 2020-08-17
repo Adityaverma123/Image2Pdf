@@ -113,7 +113,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        CircleImageView imageView;
+        ImageView imageView;
         TextView imageNo;
         ImageView deleteBtn;
         public ViewHolder(@NonNull View itemView) {
