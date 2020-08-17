@@ -2,7 +2,9 @@ package com.example.imagetopdf.Adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
@@ -10,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -35,6 +39,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     OnChangePic onChangePic;
     OnItemClickListener onItemClickListener;
     Visibility visibility;
+    public Boolean stopScrolling=true;
 
     public int getCropNo() {
         return cropNo;
@@ -60,7 +65,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
         View view= LayoutInflater.from(context).inflate(R.layout.image_item,null,false);
         return new ViewHolder(view);
     }
-
+    long then = 0;
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
@@ -73,16 +78,35 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
               onItemClickListener.onItemClicked(position,view);
             }
         });
-        holder.deleteBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.i("button pressed","pressed");
-                uris.remove(position);
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position,uris.size());
-            }
-        });
-    }
+
+            holder.imageView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Log.i("long click", "clicked");
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+                    dialog.setTitle("Remove Image");
+                    dialog.setMessage("Do you really want to remove this image?")
+
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    uris.remove(position);
+                                    notifyItemRemoved(position);
+                                    notifyItemRangeChanged(position, uris.size());
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            }).show();
+                    stopScrolling = true;
+                    return true;
+                }
+            });
+        }
+
 
     private void startCrop(int position) {
         setCropNo(position);
@@ -115,12 +139,12 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     public class ViewHolder extends RecyclerView.ViewHolder{
         CircleImageView imageView;
         TextView imageNo;
-        ImageView deleteBtn;
+        LinearLayout image_parent;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView=itemView.findViewById(R.id.gallery_image);
             imageNo=itemView.findViewById(R.id.imageNo);
-            deleteBtn=itemView.findViewById(R.id.deleteIcon);
+            image_parent=itemView.findViewById(R.id.image_parent);
 
         }
     }

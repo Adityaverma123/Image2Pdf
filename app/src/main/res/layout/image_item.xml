@@ -4,17 +4,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="10dp">
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    <ImageView
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:id="@+id/deleteIcon"
-        android:layout_alignParentEnd="true"
-        android:src="@drawable/ic_clear"/>
-    </RelativeLayout>
-
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="80dp"

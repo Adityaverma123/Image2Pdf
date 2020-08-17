@@ -92,6 +92,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
     @SuppressLint("HandlerLeak")
     private int fromPos = -1;
     private int toPos = -1;
+    Boolean stopScrolling=false;
     public AddFileFragment()
     {
 
@@ -148,51 +149,12 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
 
         },this);
         recyclerView = view.findViewById(R.id.recycler_view);
-
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, 0) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                toPos=target.getAdapterPosition();
-                return false;
-            }
-
-            @Override
-            public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
-                switch (actionState) {
-                    case ItemTouchHelper.ACTION_STATE_DRAG: {
-                        fromPos = viewHolder.getAdapterPosition();
-                        break;
-                    }
-
-                    case ItemTouchHelper.ACTION_STATE_IDLE: {
-                        if (fromPos != -1 && toPos != -1
-                                && fromPos != toPos) {
-                            moveItem(fromPos, toPos);
-                            fromPos = -1;
-                            toPos = -1;
-                        }
-                        break;
-                    }
-                }
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
-            }
-
-            @Override
-            public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-                return makeFlag(ItemTouchHelper.ACTION_STATE_DRAG, ItemTouchHelper.DOWN | ItemTouchHelper.UP | ItemTouchHelper.START | ItemTouchHelper.END);
-            }
-
-        });
-        itemTouchHelper.attachToRecyclerView(recyclerView);
         GridLayoutManager manager = new GridLayoutManager(context, 3);
         recyclerView.setLayoutManager(manager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(20);
         recyclerView.setAdapter(adapter);
+
         new MaterialShowcaseView.Builder(activity)
                 .setTarget(add_image)
                 .setDelay(600)
@@ -203,13 +165,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 .show();
         return view;
     }
-    private void moveItem(int oldPos, int newPos) {
-        Uri temp = uris.get(oldPos);
-        uris.set(oldPos, uris.get(newPos));
-        uris.set(newPos, temp);
-        adapter.notifyItemChanged(oldPos);
-        adapter.notifyItemChanged(newPos);
-    }
+
 
     @Override
     public void setVisibility(Boolean b) {
