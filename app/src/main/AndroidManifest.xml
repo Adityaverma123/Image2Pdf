@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.imagetopdf">
+    package="com.PDFKaro.imagetopdf">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -24,8 +24,8 @@
                 android:resource="@xml/provider_paths" />
         </provider>
         <provider
-            android:name="com.imagetopdf.Utils.FileProvider"
-            android:authorities="com.imagetopdf.Utils.FileProvider"
+            android:name=".Utils.FileProvider"
+            android:authorities="com.PDFKaro.imagetopdf.Utils.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -40,7 +40,7 @@
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
-        <activity android:name="com.imagetopdf.ui.SplashActivity"
+        <activity android:name=".ui.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,7 +49,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.imagetopdf.ui.MainActivity"
+            android:name=".ui.MainActivity"
             android:screenOrientation="portrait" />
     </application>
 

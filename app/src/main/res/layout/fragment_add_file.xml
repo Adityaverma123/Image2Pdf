@@ -7,14 +7,13 @@
     android:background="@drawable/main_background"
     android:layout_margin="5dp"
     android:id="@+id/parent"
-    tools:context="com.imagetopdf.Fragments.AddFileFragment">
+    tools:context="com.PDFKaro.imagetopdf.Fragments.AddFileFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+        android:padding="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
