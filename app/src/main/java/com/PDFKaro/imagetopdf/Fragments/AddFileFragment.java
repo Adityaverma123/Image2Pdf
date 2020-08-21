@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -109,7 +110,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
-
+                        Log.i("clicked","button clicked");
                         CreatePdfThread thread=new CreatePdfThread();
                         thread.setPriority(Thread.MAX_PRIORITY);
                         thread.start();
@@ -187,7 +188,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.spacing);
         //recyclerView.addItemDecoration(new SpaceItemDecoration(spacingInPixels));
         recyclerView.setHasFixedSize(true);
-        recyclerView.setItemViewCacheSize(20);
+        //recyclerView.setItemViewCacheSize(20);
         recyclerView.setAdapter(adapter);
         new MaterialShowcaseView.Builder(activity)
                 .setTarget(add_image)
@@ -412,6 +413,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         intent.setType("image/*");
         String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent, Constants.OPENGALLERY);
 
@@ -471,11 +473,24 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
             startCrop(uri, Constants.CROP_CAMERA);
 
         } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
-            if (data != null) {
+            ClipData clipData = data.getClipData();
+            if (clipData != null) {
+                try {
 
+
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        Uri uri = clipData.getItemAt(i).getUri();
+                        uris.add(uri);
+                        adapter.notifyDataSetChanged();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
                 try {
                     Uri uri = data.getData();
-                    startCrop(uri,Constants.CROP_CAMERA);
+                    uris.add(uri);
+                    adapter.notifyDataSetChanged();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
