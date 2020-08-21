@@ -43,12 +43,11 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.PDFKaro.imagetopdf.Adapters.ImageAdapter;
-import com.PDFKaro.imagetopdf.Utils.Constants;
 import com.PDFKaro.imagetopdf.BuildConfig;
 import com.PDFKaro.imagetopdf.Interface.OnChangePic;
 import com.PDFKaro.imagetopdf.Interface.Visibility;
 import com.PDFKaro.imagetopdf.R;
-import com.PDFKaro.imagetopdf.Utils.SpaceItemDecoration;
+import com.PDFKaro.imagetopdf.Utils.Constants;
 import com.google.android.material.snackbar.Snackbar;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
@@ -108,7 +107,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
             public void onClick(View view) {
 
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
+                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
 
                         CreatePdfThread thread=new CreatePdfThread();
@@ -516,6 +515,11 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         if (requestCode == Constants.OPENGALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             openGallery();
             add_image.setVisibility(View.VISIBLE);
+        }
+        if (requestCode == Constants.WRITE_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            CreatePdfThread thread=new CreatePdfThread();
+            thread.setPriority(Thread.MAX_PRIORITY);
+            thread.start();
         }
 
     }
