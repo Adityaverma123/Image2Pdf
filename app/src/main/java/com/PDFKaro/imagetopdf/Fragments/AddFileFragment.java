@@ -413,7 +413,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         intent.setType("image/*");
         String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
+       // intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent, Constants.OPENGALLERY);
 
@@ -473,28 +473,30 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
             startCrop(uri, Constants.CROP_CAMERA);
 
         } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
-            ClipData clipData = data.getClipData();
-            if (clipData != null) {
-                try {
-
-
-                    for (int i = 0; i < clipData.getItemCount(); i++) {
-                        Uri uri = clipData.getItemAt(i).getUri();
-                        uris.add(uri);
-                        adapter.notifyDataSetChanged();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                try {
-                    Uri uri = data.getData();
-                    uris.add(uri);
-                    adapter.notifyDataSetChanged();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+//            ClipData clipData = data.getClipData();
+//            if (clipData != null) {
+//                try {
+//
+//
+//                    for (int i = 0; i < clipData.getItemCount(); i++) {
+//                        Uri uri = clipData.getItemAt(i).getUri();
+//                        uris.add(uri);
+//                        adapter.notifyDataSetChanged();
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            } else {
+//                try {
+//                    Uri uri = data.getData();
+//                    uris.add(uri);
+//                    adapter.notifyDataSetChanged();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+            Uri uri = data.getData();
+                    startCrop(uri,Constants.WRITE_GALLERY);
 
         } else if (requestCode == Constants.CHANGE_PIC) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);

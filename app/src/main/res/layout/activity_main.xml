@@ -6,7 +6,7 @@
     android:id="@+id/main_layout"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.imagetopdf.com.PdfKaro.imagetopdf.ui.MainActivity">
+    tools:context="com.PDFKaro.imagetopdf.ui.MainActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar1"
