@@ -80,8 +80,6 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
     int positionOfCrop;
     Dialog dialog;
     ConstraintLayout parent;
-    Context context;
-    Activity activity;
     ImageView add_image;
     Button cancel;
     @SuppressLint("HandlerLeak")
@@ -95,24 +93,25 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         parent=findViewById(R.id.parent);
         add_image=findViewById(R.id.add_image);
         uris = new ArrayList<>();
-        showDialog();
         createPdf = findViewById(R.id.createPdfBtn);
+        showDialog();
+
         createPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
+                if (ActivityCompat.checkSelfPermission(AddImagesActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(AddImagesActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                 } else {
 
                     AddImagesActivity.CreatePdfThread thread=new AddImagesActivity.CreatePdfThread();
                     thread.setPriority(Thread.MAX_PRIORITY);
                     thread.start();
-                    AppRate.with(context).setInstallDays(1)
+                    AppRate.with(AddImagesActivity.this).setInstallDays(1)
                             .setLaunchTimes(3)
                             .setRemindInterval(2)
                             .monitor();
-                    AppRate.showRateDialogIfMeetsConditions(activity);
+                    AppRate.showRateDialogIfMeetsConditions(AddImagesActivity.this);
                 }
             }
 
@@ -177,21 +176,13 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
 
         });
         itemTouchHelper.attachToRecyclerView(recyclerView);
-        GridLayoutManager manager = new GridLayoutManager(context, 3);
+        GridLayoutManager manager = new GridLayoutManager(this, 3);
         recyclerView.setLayoutManager(manager);
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.spacing);
         //recyclerView.addItemDecoration(new SpaceItemDecoration(spacingInPixels));
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(20);
         recyclerView.setAdapter(adapter);
-        new MaterialShowcaseView.Builder(activity)
-                .setTarget(add_image)
-                .setDelay(600)
-                .setDismissOnTargetTouch(true)
-                .setDismissOnTouch(true)
-                .setContentText("This button will allow you to add images from camera and gallery")
-                .singleUse(Constants.SHOWCASE_ID)
-                .show();
     }
     private void moveItem(int oldPos, int newPos) {
         Uri temp = uris.get(oldPos);
@@ -204,13 +195,6 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
     public void setVisibility(Boolean b) {
         if (b) {
             createPdf.setVisibility(View.VISIBLE);
-            new MaterialShowcaseView.Builder(activity)
-                    .setTarget(createPdf)
-                    .setDismissOnTargetTouch(true)
-                    .setDismissOnTouch(true)
-                    .setContentText("Generate Pdf by clicking on this button")
-                    .singleUse(Constants.SHOWCASE_PDF)
-                    .show();
         }
         else createPdf.setVisibility(View.GONE);
     }
@@ -220,7 +204,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
             try {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-                File filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+                File filePath = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
                 File dir = new File(filePath.getAbsolutePath() + "/Image2Pdf");
                 if (!dir.exists()) {
                     dir.mkdir();
@@ -290,7 +274,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         File file=getImageFile(filename);
         Uri path;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            path = FileProvider.getUriForFile(context, "com.PDFKaro.imagetopdf.Utils.FileProvider", file);
+            path = FileProvider.getUriForFile(this, "com.PDFKaro.imagetopdf.Utils.FileProvider", file);
         else
             path = Uri.fromFile(file);
         MimeTypeMap map = MimeTypeMap.getSingleton();
@@ -305,7 +289,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         }
         catch(ActivityNotFoundException e)
         {
-            Toast.makeText(context, "No Application available to view pdf", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "No Application available to view pdf", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -321,7 +305,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
 
     }
     private File getImageFile(String filename) {
-        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        File filePath= getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
         File file=new File(dir,filename);
         return file;
@@ -329,7 +313,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
     private void showDialog()
     {
 
-        dialog=new Dialog(context,android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+        dialog=new Dialog(this,android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.select_image_dialog);
         dialog.setCanceledOnTouchOutside(false);
@@ -346,6 +330,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         LinearLayout  gallery=dialog.findViewById(R.id.galley);
         cancel=dialog.findViewById(R.id.cancelBtn);
         dialog.show();
+        createPdf.setVisibility(View.GONE);
         add_image.setVisibility(View.GONE);
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -355,8 +340,10 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
                     if (ActivityCompat.checkSelfPermission(AddImagesActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(AddImagesActivity.this,new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
 
-                    } else
+                    } else {
+                        dialog.dismiss();
                         openCamera();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -370,6 +357,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
                    ActivityCompat.requestPermissions(AddImagesActivity.this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
 
                 } else {
+                    dialog.dismiss();
                     add_image.setVisibility(View.VISIBLE);
                     Log.i("Click", "Gallery clicked");
                     openGallery();
@@ -390,7 +378,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
 
         String imageFileName = "JPEG_" + System.currentTimeMillis() + "_";
         File file = File.createTempFile(
-                imageFileName, ".jpg", context.getCacheDir()
+                imageFileName, ".jpg", getCacheDir()
         );
         currentPhotoPath = "file:" + file.getAbsolutePath();
         return file;
@@ -402,7 +390,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         File file = getImageFile();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            path = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID.concat(".provider"), file);
+            path = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID.concat(".provider"), file);
         else
             path = Uri.fromFile(file); // 3
         intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
@@ -438,7 +426,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
                 try {
                     Uri imageUri = result.getUri();
                     uris.add(imageUri);
-                    InputStream input = context.getContentResolver().openInputStream(imageUri);
+                    InputStream input = getContentResolver().openInputStream(imageUri);
                     Bitmap bitmap = BitmapFactory.decodeStream(input);
                     Log.i("imageuri", imageUri.toString());
 //                    bitmaps.add(bitmap);
@@ -448,7 +436,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
                 }
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception exception = result.getError();
-                Toast.makeText(context, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
 
             }
         } else if (requestCode == Constants.PICK_IMAGE && resultCode == RESULT_OK) {
@@ -479,7 +467,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
 
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception exception = result.getError();
-                Toast.makeText(context, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Possible Error " + exception, Toast.LENGTH_SHORT).show();
 
             }
         }
@@ -488,7 +476,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
     @Override
     public void startCrop(Uri uri, int requestcode) {
         Intent intent = CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
-                .getIntent(context);
+                .getIntent(this);
         startActivityForResult(intent, requestcode);
     }
 }

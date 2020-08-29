@@ -1,6 +1,7 @@
 package com.PDFKaro.imagetopdf.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,11 +43,18 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout. activity_home);
         add_image=findViewById(R.id.add_image_home);
         recyclerView = findViewById(R.id.pdf_list);
+        add_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(HomeActivity.this,AddImagesActivity.class);
+                startActivity(intent);
+            }
+        });
         names=new ArrayList<>();
-        adapter=new PdfAdapter(this,names);
+       // adapter=new PdfAdapter(this,names);
         LinearLayoutManager manager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
-        createList();
+        //createList();
     }
 }
