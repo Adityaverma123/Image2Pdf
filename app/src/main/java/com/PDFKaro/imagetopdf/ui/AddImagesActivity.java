@@ -5,8 +5,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -70,7 +72,7 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 
 import static android.app.Activity.RESULT_OK;
 
-public class AddImagesActivity extends AppCompatActivity implements OnChangePic,Visibility {
+public class AddImagesActivity extends AppCompatActivity implements OnChangePic, Visibility {
     private List<Uri> uris;
     private ImageAdapter adapter;
     private RecyclerView recyclerView;
@@ -82,6 +84,8 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
     ConstraintLayout parent;
     ImageView add_image;
     Button cancel;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
     @SuppressLint("HandlerLeak")
     private int fromPos = -1;
     private int toPos = -1;
@@ -90,21 +94,33 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_images);
-        parent=findViewById(R.id.parent);
-        add_image=findViewById(R.id.add_image);
+        parent = findViewById(R.id.parent);
+        add_image = findViewById(R.id.add_image);
         uris = new ArrayList<>();
         createPdf = findViewById(R.id.createPdfBtn);
+        sharedPreferences=getSharedPreferences("Home2List",Context.MODE_PRIVATE);
+        editor=sharedPreferences.edit();
         showDialog();
-
         createPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (Build.VERSION.SDK_INT > 23) {
+                    if (ActivityCompat.checkSelfPermission(AddImagesActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(AddImagesActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
+                    } else {
 
-                if (ActivityCompat.checkSelfPermission(AddImagesActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(AddImagesActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
-                } else {
-
-                    AddImagesActivity.CreatePdfThread thread=new AddImagesActivity.CreatePdfThread();
+                        AddImagesActivity.CreatePdfThread thread = new AddImagesActivity.CreatePdfThread();
+                        thread.setPriority(Thread.MAX_PRIORITY);
+                        thread.start();
+                        AppRate.with(AddImagesActivity.this).setInstallDays(1)
+                                .setLaunchTimes(3)
+                                .setRemindInterval(2)
+                                .monitor();
+                        AppRate.showRateDialogIfMeetsConditions(AddImagesActivity.this);
+                    }
+                }
+                else {
+                    AddImagesActivity.CreatePdfThread thread = new AddImagesActivity.CreatePdfThread();
                     thread.setPriority(Thread.MAX_PRIORITY);
                     thread.start();
                     AppRate.with(AddImagesActivity.this).setInstallDays(1)
@@ -134,13 +150,13 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
                 }
             }
 
-        },this);
-        recyclerView =findViewById(R.id.recycler_view);
+        }, this);
+        recyclerView = findViewById(R.id.recycler_view);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, 0) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                toPos=target.getAdapterPosition();
+                toPos = target.getAdapterPosition();
                 return false;
             }
 
@@ -184,6 +200,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         recyclerView.setItemViewCacheSize(20);
         recyclerView.setAdapter(adapter);
     }
+
     private void moveItem(int oldPos, int newPos) {
         Uri temp = uris.get(oldPos);
         uris.set(oldPos, uris.get(newPos));
@@ -191,13 +208,14 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         adapter.notifyItemChanged(oldPos);
         adapter.notifyItemChanged(newPos);
     }
+
     @Override
     public void setVisibility(Boolean b) {
         if (b) {
             createPdf.setVisibility(View.VISIBLE);
-        }
-        else createPdf.setVisibility(View.GONE);
+        } else createPdf.setVisibility(View.GONE);
     }
+
     private class CreatePdfThread extends Thread{
         @Override
         public void run() {
@@ -247,6 +265,9 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
             public void handleMessage(Message msg) {
 
                 final String filename=(String)msg.obj;
+                editor.putString("name",filename).apply();
+                editor.putString("uri",uris.get(0).toString()).apply();
+
                 Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
                         new View.OnClickListener() {
                             @Override
@@ -261,17 +282,21 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
 
 
     }
+
+
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(uris.size()!=0)
-        {
+        if (uris.size() != 0) {
             uris.clear();
         }
     }
+
     private void openPdf(String filename) {
-        Intent intent=new Intent(Intent.ACTION_VIEW);
-        File file=getImageFile(filename);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        File file = getImageFile(filename);
         Uri path;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             path = FileProvider.getUriForFile(this, "com.PDFKaro.imagetopdf.Utils.FileProvider", file);
@@ -280,15 +305,12 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         MimeTypeMap map = MimeTypeMap.getSingleton();
         String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
         String type = map.getMimeTypeFromExtension(ext);
-        intent.setDataAndType(path,type);
+        intent.setDataAndType(path, type);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        try
-        {
+        try {
             startActivity(intent);
-        }
-        catch(ActivityNotFoundException e)
-        {
+        } catch (ActivityNotFoundException e) {
             Toast.makeText(this, "No Application available to view pdf", Toast.LENGTH_LONG).show();
         }
     }
@@ -299,36 +321,37 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         intent.setType("image/*");
         String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        //intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent, Constants.OPENGALLERY);
 
     }
+
     private File getImageFile(String filename) {
-        File filePath= getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
-        File file=new File(dir,filename);
+        File filePath = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        File dir = new File(filePath.getAbsolutePath() + "/Image2Pdf");
+        File file = new File(dir, filename);
         return file;
     }
-    private void showDialog()
-    {
 
-        dialog=new Dialog(this,android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+    private void showDialog() {
+
+        dialog = new Dialog(this, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.select_image_dialog);
         dialog.setCanceledOnTouchOutside(false);
-        Window window=dialog.getWindow();
+        Window window = dialog.getWindow();
         WindowManager.LayoutParams wlp = window.getAttributes();
 
         wlp.gravity = Gravity.BOTTOM;
-        wlp.windowAnimations=R.style.DialogAnimation;
+        wlp.windowAnimations = R.style.DialogAnimation;
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.setAttributes(wlp);
         window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        LinearLayout camera=dialog.findViewById(R.id.camera);
-        LinearLayout  gallery=dialog.findViewById(R.id.galley);
-        cancel=dialog.findViewById(R.id.cancelBtn);
+        LinearLayout camera = dialog.findViewById(R.id.camera);
+        LinearLayout gallery = dialog.findViewById(R.id.galley);
+        cancel = dialog.findViewById(R.id.cancelBtn);
         dialog.show();
         createPdf.setVisibility(View.GONE);
         add_image.setVisibility(View.GONE);
@@ -338,7 +361,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
                 add_image.setVisibility(View.VISIBLE);
                 try {
                     if (ActivityCompat.checkSelfPermission(AddImagesActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(AddImagesActivity.this,new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
+                        ActivityCompat.requestPermissions(AddImagesActivity.this, new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
 
                     } else {
                         dialog.dismiss();
@@ -354,7 +377,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
             @Override
             public void onClick(View v) {
                 if (ActivityCompat.checkSelfPermission(AddImagesActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                   ActivityCompat.requestPermissions(AddImagesActivity.this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
+                    ActivityCompat.requestPermissions(AddImagesActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
 
                 } else {
                     dialog.dismiss();
@@ -374,6 +397,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         });
 
     }
+
     private File getImageFile() throws IOException {
 
         String imageFileName = "JPEG_" + System.currentTimeMillis() + "_";
@@ -396,6 +420,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
         startActivityForResult(intent, Constants.PICK_IMAGE);
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -412,10 +437,11 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
             openGallery();
         }
         if (requestCode == Constants.WRITE_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            CreatePdfThread thread=new CreatePdfThread();
+            CreatePdfThread thread = new CreatePdfThread();
             thread.start();
         }
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -448,12 +474,14 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
             if (data != null) {
 
                 try {
+
                     Uri uri = data.getData();
                     startCrop(uri,Constants.CROP_CAMERA);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
+
 
         } else if (requestCode == Constants.CHANGE_PIC) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
