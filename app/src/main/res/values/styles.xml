@@ -11,7 +11,7 @@
     </style>
 
     <style name="customfontstyle" parent="@android:style/TextAppearance.Small">
-        <item name="android:fontFamily">@font/caviar_dreams</item>a
+        <item name="android:fontFamily">@font/caviar_dreams_bold</item>a
         <item name="android:textSize">20sp</item>
     </style>
     <style name="customfontstyletab" parent="@android:style/TextAppearance.Small">
