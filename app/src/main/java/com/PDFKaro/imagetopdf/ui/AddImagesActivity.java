@@ -222,8 +222,8 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
             try {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-                File filePath = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-                File dir = new File(filePath.getAbsolutePath() + "/Image2Pdf");
+                File filePath = Environment.getExternalStorageDirectory();
+                File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
                 if (!dir.exists()) {
                     dir.mkdir();
                 }
@@ -328,8 +328,8 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
     }
 
     private File getImageFile(String filename) {
-        File filePath = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-        File dir = new File(filePath.getAbsolutePath() + "/Image2Pdf");
+        File filePath = Environment.getExternalStorageDirectory();
+        File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
         File file = new File(dir, filename);
         return file;
     }

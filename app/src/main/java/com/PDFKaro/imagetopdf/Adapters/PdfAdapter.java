@@ -86,7 +86,27 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                         }
                     } else {
                         names.remove(position);
+                        dates.remove(position);
+                        uris.remove(position);
+                        times.remove(position);
                         notifyItemRemoved(position);
+                        notifyItemRangeChanged(position,names.size());
+                        notifyDataSetChanged();
+                        SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
+                        preferences.edit().clear().apply();
+
+                        SharedPreferences.Editor editor=preferences.edit();
+                        Gson gson=new Gson();
+                        String json=gson.toJson(names);
+                        String image=gson.toJson(uris);
+                        String date=gson.toJson(dates);
+                        String time=gson.toJson(times);
+                        editor.putString("task_list",json);
+                        editor.putString("task_image",image);
+                        editor.putString("task_date",date);
+                        editor.putString("task_time",time);
+                        editor.apply();
+                        notifyDataSetChanged();
                         Toast.makeText(context, "Item doesn't exist", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -142,16 +162,16 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
     private void deleteFile(String filename)
     {
-        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+        File filePath= Environment.getExternalStorageDirectory();
+        File dir=new File(filePath.getAbsolutePath()+"/PDFKaro");
         File file=new File(dir,filename);
         file.delete();
     }
 
     private File getImageFile(int position) {
 
-        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-        File dir=new File(filePath.getAbsolutePath()+"/Image2Pdf");
+        File filePath= Environment.getExternalStorageDirectory();
+        File dir=new File(filePath.getAbsolutePath()+"/PDFKaro");
 
         String fileName=names.get(position);
         File file=new File(dir,fileName);

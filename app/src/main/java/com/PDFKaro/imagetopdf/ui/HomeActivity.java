@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.PDFKaro.imagetopdf.Adapters.PdfAdapter;
+import com.PDFKaro.imagetopdf.Interface.RefreshList;
 import com.PDFKaro.imagetopdf.Utils.Constants;
 import com.PDFKaro.imagetopdf.R;
 import com.google.gson.Gson;
@@ -29,7 +30,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements RefreshList {
     private Button add_image;
     RecyclerView recyclerView;
     SharedPreferences preferences;
@@ -74,23 +75,7 @@ public class HomeActivity extends AppCompatActivity {
         Log.i("status","pause");
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        String name = preferences.getString("name", null);
-        String uri = preferences.getString("uri", null);
 
-
-        if(name!=null && uri!=null)
-        {
-            insertData(name,uri);
-        }
-        else {
-
-            Log.i("value","null");
-        }
-
-    }
 
     private void buildRecyclerView() {
         recyclerView = findViewById(R.id.pdf_list);
@@ -184,5 +169,10 @@ public class HomeActivity extends AppCompatActivity {
         {
             times=new ArrayList<>();
         }
+    }
+
+    @Override
+    public void sendName(String name, String uri) {
+        insertData(name,uri);
     }
 }
