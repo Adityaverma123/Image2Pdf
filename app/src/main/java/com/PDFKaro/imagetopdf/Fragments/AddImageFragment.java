@@ -241,6 +241,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
     private class CreatePdfThread extends Thread{
         @Override
         public void run() {
+            List<String>finaluri=new ArrayList<>();
             try {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
@@ -500,18 +501,20 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
         } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
             ClipData clipData=data.getClipData();
+            List<String>galleryUri=new ArrayList<>();
             if(clipData!=null)
             {
                 int count=clipData.getItemCount();
                 for(int i=0;i<count;i++)
                 {
                     Uri uri=clipData.getItemAt(i).getUri();
-
-                    uris.add(Uri.parse(getPath(uri)));
+                    uris.add(uri);
+                    galleryUri.add(getPath(uri));
                 }
             }
             else {
                 Uri uri=data.getData();
+                galleryUri.add(getPath(uri));
                 uris.add(Uri.parse(getPath(uri)));
             }
             Log.i("uris",uris.toString());
