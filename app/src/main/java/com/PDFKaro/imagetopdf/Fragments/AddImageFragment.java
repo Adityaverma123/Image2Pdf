@@ -501,6 +501,8 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                 try {
 
                     Uri uri = data.getData();
+                    Log.i("uri",uri.toString());
+
                     startCrop(uri,Constants.CROP_CAMERA);
                 } catch (Exception e) {
                     e.printStackTrace();

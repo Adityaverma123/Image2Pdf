@@ -43,12 +43,11 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.PDFKaro.imagetopdf.Adapters.ImageAdapter;
-import com.PDFKaro.imagetopdf.Utils.Constants;
 import com.PDFKaro.imagetopdf.BuildConfig;
 import com.PDFKaro.imagetopdf.Interface.OnChangePic;
 import com.PDFKaro.imagetopdf.Interface.Visibility;
 import com.PDFKaro.imagetopdf.R;
-import com.PDFKaro.imagetopdf.Utils.SpaceItemDecoration;
+import com.PDFKaro.imagetopdf.Utils.Constants;
 import com.google.android.material.snackbar.Snackbar;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
@@ -56,10 +55,6 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
-import com.zhihu.matisse.Matisse;
-import com.zhihu.matisse.MimeType;
-import com.zhihu.matisse.engine.impl.GlideEngine;
-import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
 import java.io.File;
 import java.io.FileOutputStream;
