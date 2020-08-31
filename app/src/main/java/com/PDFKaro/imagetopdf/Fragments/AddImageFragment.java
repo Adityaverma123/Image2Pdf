@@ -131,9 +131,11 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.WRITE_GALLERY);
                     } else {
 
-                       CreatePdfThread thread = new CreatePdfThread();
-                        thread.setPriority(Thread.MAX_PRIORITY);
-                        thread.start();
+//                       CreatePdfThread thread = new CreatePdfThread();
+//                        thread.setPriority(Thread.MAX_PRIORITY);
+//                        thread.start();
+                        CreatePdf createPdf=new CreatePdf();
+                        createPdf.execute(uris.size());
                         AppRate.with(context).setInstallDays(1)
                                 .setLaunchTimes(3)
                                 .setRemindInterval(2)
@@ -142,9 +144,8 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                     }
                 }
                 else {
-                    CreatePdfThread thread = new CreatePdfThread();
-                    thread.setPriority(Thread.MAX_PRIORITY);
-                    thread.start();
+                    CreatePdf createPdf=new CreatePdf();
+                    createPdf.execute(uris.size());
                     AppRate.with(context).setInstallDays(1)
                             .setLaunchTimes(3)
                             .setRemindInterval(2)
@@ -294,7 +295,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                         new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                openPdf(filename);
+                                //openPdf(filename);
                             }
                         }).show();
                 uris.clear();
@@ -304,10 +305,97 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
 
     }
-    public class CreatePdf extends AsyncTask<Void,Void,String>{
+    public class CreatePdf extends AsyncTask<Integer,Void,String> {
+
         @Override
-        protected String doInBackground(Void... voids) {
+        protected String doInBackground(Integer... integers) {
+            int size = integers[0];
+            try {
+
+
+                File filePath = Environment.getExternalStorageDirectory();
+                File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
+                if (!dir.exists()) {
+                    dir.mkdir();
+                }
+                String filename = System.currentTimeMillis() + ".pdf";
+                Document document1 = new Document();
+                PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
+                document1.open();
+                for (int j = 0; j < size; j++) {
+                    int quality = 30;
+                    double qualitymode = quality * 0.9;
+                    String uri=getPath(uris.get(j));
+                    Image image = Image.getInstance(uri);
+                    image.setCompressionLevel((int) qualitymode);
+                    image.setBorder(Rectangle.BOX);
+                    image.setBorderWidth(0);
+                    float scaler = ((document1.getPageSize().getWidth() - document1.leftMargin()
+                            - document1.rightMargin() - 0) / image.getWidth()) * 100;
+                    image.scalePercent(scaler);
+                    image.setAlignment(Image.ALIGN_CENTER | Image.ALIGN_TOP);
+                    document1.add(image);
+                    document1.newPage();
+
+                }
+                return filename;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(final String s) {
+            super.onPostExecute(s);
+            if(s!=null)
+            {
+                refreshList.sendName(s,uris.get(0).toString());
+                Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                openPdf(s);
+                            }
+                        }).show();
+                uris.clear();
+                adapter.notifyDataSetChanged();
+            }
+        }
+        private void openPdf(String filename) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            File file = getImageFile(filename);
+            Uri path;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                path = FileProvider.getUriForFile(context, "com.PDFKaro.imagetopdf.Utils.FileProvider", file);
+            else
+                path = Uri.fromFile(file);
+            MimeTypeMap map = MimeTypeMap.getSingleton();
+            String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+            String type = map.getMimeTypeFromExtension(ext);
+            intent.setDataAndType(path, type);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(context, "No Application available to view pdf", Toast.LENGTH_LONG).show();
+            }
+        }
+        private File getImageFile(String filename) {
+            File filePath = Environment.getExternalStorageDirectory();
+            File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
+            File file = new File(dir, filename);
+            return file;
+        }
+        private String getPath(Uri uri) {
+            String[]  data = { MediaStore.Images.Media.DATA };
+            CursorLoader loader = new CursorLoader(context, uri, data, null, null, null);
+            Cursor cursor = loader.loadInBackground();
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
         }
     }
 
@@ -330,26 +418,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
         }
     }
 
-    private void openPdf(String filename) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        File file = getImageFile(filename);
-        Uri path;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            path = FileProvider.getUriForFile(context, "com.PDFKaro.imagetopdf.Utils.FileProvider", file);
-        else
-            path = Uri.fromFile(file);
-        MimeTypeMap map = MimeTypeMap.getSingleton();
-        String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
-        String type = map.getMimeTypeFromExtension(ext);
-        intent.setDataAndType(path, type);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        try {
-            startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(context, "No Application available to view pdf", Toast.LENGTH_LONG).show();
-        }
-    }
+
 
     @SuppressLint("IntentReset")
     private void openGallery() {
@@ -363,12 +432,6 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
     }
 
-    private File getImageFile(String filename) {
-        File filePath = Environment.getExternalStorageDirectory();
-        File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
-        File file = new File(dir, filename);
-        return file;
-    }
 
     private void showDialog() {
 
@@ -515,12 +578,12 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                 {
                     Uri uri=clipData.getItemAt(i).getUri();
 
-                    uris.add(Uri.parse(getPath(uri)));
+                    uris.add(uri);
                 }
             }
             else {
                 Uri uri=data.getData();
-                uris.add(Uri.parse(getPath(uri)));
+                uris.add(uri);
             }
             Log.i("uris",uris.toString());
             adapter.notifyDataSetChanged();
@@ -543,14 +606,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             }
         }
     }
-    private String getPath(Uri uri) {
-        String[]  data = { MediaStore.Images.Media.DATA };
-        CursorLoader loader = new CursorLoader(context, uri, data, null, null, null);
-        Cursor cursor = loader.loadInBackground();
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
-    }
+
     @Override
     public void startCrop(Uri uri, int requestcode) {
         Intent intent = CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
