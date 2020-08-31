@@ -16,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -303,6 +304,13 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
 
     }
+    public class CreatePdf extends AsyncTask<Void,Void,String>{
+        @Override
+        protected String doInBackground(Void... voids) {
+            return null;
+        }
+    }
+
 
     @Override
     public void onAttach(@NonNull Context context) {
