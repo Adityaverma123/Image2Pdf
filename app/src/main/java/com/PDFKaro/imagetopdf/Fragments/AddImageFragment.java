@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -346,7 +347,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
         intent.setType("image/*");
         String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        //intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent, Constants.OPENGALLERY);
 
@@ -496,16 +497,22 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             startCrop(uri, Constants.CROP_CAMERA);
 
         } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
-            if (data != null) {
-
-                try {
-
-                    Uri uri = data.getData();
-                    startCrop(uri,Constants.CROP_CAMERA);
-                } catch (Exception e) {
-                    e.printStackTrace();
+            ClipData clipData=data.getClipData();
+            if(clipData!=null)
+            {
+                int count=clipData.getItemCount();
+                for(int i=0;i<count;i++)
+                {
+                    Uri uri=clipData.getItemAt(i).getUri();
+                    uris.add(uri);
                 }
             }
+            else {
+                Uri uri=data.getData();
+                uris.add(uri);
+            }
+            Log.i("uris",uris.toString());
+            adapter.notifyDataSetChanged();
 
 
         } else if (requestCode == Constants.CHANGE_PIC) {
