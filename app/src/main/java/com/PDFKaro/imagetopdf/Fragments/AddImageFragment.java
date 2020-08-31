@@ -24,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,6 +36,9 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -86,6 +90,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
     Button cancel;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
+    ImageView backbtn;
     @SuppressLint("HandlerLeak")
     private int fromPos = -1;
     private int toPos = -1;
@@ -107,7 +112,6 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
         context=getContext();
         activity=getActivity();
-
         parent = view.findViewById(R.id.parent);
         add_image = view.findViewById(R.id.add_image);
         uris = new ArrayList<>();
@@ -214,6 +218,8 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
         recyclerView.setAdapter(adapter);
         return view;
     }
+
+
     private void moveItem(int oldPos, int newPos) {
         Uri temp = uris.get(oldPos);
         uris.set(oldPos, uris.get(newPos));

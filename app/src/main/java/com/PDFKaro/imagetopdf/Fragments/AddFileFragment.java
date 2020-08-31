@@ -56,6 +56,10 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
+import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -415,6 +419,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivityForResult(intent, Constants.OPENGALLERY);
+
 
     }
 
