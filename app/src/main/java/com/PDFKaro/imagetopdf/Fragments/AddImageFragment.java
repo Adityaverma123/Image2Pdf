@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -26,6 +27,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.loader.content.CursorLoader;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -504,12 +506,13 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                 for(int i=0;i<count;i++)
                 {
                     Uri uri=clipData.getItemAt(i).getUri();
-                    uris.add(uri);
+
+                    uris.add(Uri.parse(getPath(uri)));
                 }
             }
             else {
                 Uri uri=data.getData();
-                uris.add(uri);
+                uris.add(Uri.parse(getPath(uri)));
             }
             Log.i("uris",uris.toString());
             adapter.notifyDataSetChanged();
@@ -532,7 +535,14 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             }
         }
     }
-
+    private String getPath(Uri uri) {
+        String[]  data = { MediaStore.Images.Media.DATA };
+        CursorLoader loader = new CursorLoader(context, uri, data, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
     @Override
     public void startCrop(Uri uri, int requestcode) {
         Intent intent = CropImage.activity(uri).setGuidelines(CropImageView.Guidelines.ON)
