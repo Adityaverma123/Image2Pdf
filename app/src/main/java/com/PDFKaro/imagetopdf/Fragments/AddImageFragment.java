@@ -64,6 +64,10 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
+import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -342,13 +346,21 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
     @SuppressLint("IntentReset")
     private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/*");
-        String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        //intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivityForResult(intent, Constants.OPENGALLERY);
+//        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        intent.setType("image/*");
+//        String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
+//        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+//        //intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+//        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//        startActivityForResult(intent, Constants.OPENGALLERY);
+        Matisse.from(activity)
+                .choose(MimeType.ofImage(), false)
+                .countable(true)
+                .capture(true)
+                .captureStrategy(new CaptureStrategy(true, BuildConfig.APPLICATION_ID.concat(".provider")))
+                .maxSelectable(1000)
+                .imageEngine(new GlideEngine())
+                .forResult(Constants.OPEN_GALLERY);
 
     }
 
@@ -402,7 +414,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             @Override
             public void onClick(View v) {
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions( new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
+                    requestPermissions( new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPEN_GALLERY);
 
                 } else {
                     dialog.dismiss();
@@ -458,7 +470,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                 }
             }
         }
-        if (requestCode == Constants.OPENGALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == Constants.OPEN_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             openGallery();
         }
         if (requestCode == Constants.WRITE_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -495,17 +507,20 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
             startCrop(uri, Constants.CROP_CAMERA);
 
-        } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
-            if (data != null) {
-
-                try {
-
-                    Uri uri = data.getData();
-                    startCrop(uri,Constants.CROP_CAMERA);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        } else if (requestCode ==Constants.OPEN_GALLERY && resultCode == RESULT_OK) {
+//            if (data != null) {
+//
+//                try {
+//
+//                    Uri uri = data.getData();
+//                    startCrop(uri,Constants.CROP_CAMERA);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+            List<Uri>uriList=Matisse.obtainResult(data);
+            uris.addAll(uriList);
+            adapter.notifyDataSetChanged();
 
 
         } else if (requestCode == Constants.CHANGE_PIC) {

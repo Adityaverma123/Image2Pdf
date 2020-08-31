@@ -372,7 +372,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
             @Override
             public void onClick(View v) {
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
+                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPEN_GALLERY);
 
                 } else {
                     add_image.setVisibility(View.VISIBLE);
@@ -418,7 +418,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
         String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivityForResult(intent, Constants.OPENGALLERY);
+        startActivityForResult(intent, Constants.OPEN_GALLERY);
 
 
     }
@@ -476,7 +476,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
 
             startCrop(uri, Constants.CROP_CAMERA);
 
-        } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
+        } else if (requestCode == Constants.OPEN_GALLERY && resultCode == RESULT_OK) {
             if (data != null) {
 
                 try {
@@ -518,7 +518,7 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
                 }
             }
 
-        if (requestCode == Constants.OPENGALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == Constants.OPEN_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             openGallery();
             add_image.setVisibility(View.VISIBLE);
         }

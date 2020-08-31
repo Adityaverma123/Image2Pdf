@@ -59,6 +59,7 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+import com.zhihu.matisse.Matisse;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -323,7 +324,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
         //intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivityForResult(intent, Constants.OPENGALLERY);
+        startActivityForResult(intent, Constants.OPEN_GALLERY);
 
     }
 
@@ -377,7 +378,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
             @Override
             public void onClick(View v) {
                 if (ActivityCompat.checkSelfPermission(AddImagesActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(AddImagesActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
+                    ActivityCompat.requestPermissions(AddImagesActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPEN_GALLERY);
 
                 } else {
                     dialog.dismiss();
@@ -433,7 +434,7 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
                 }
             }
         }
-        if (requestCode == Constants.OPENGALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == Constants.OPEN_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             openGallery();
         }
         if (requestCode == Constants.WRITE_GALLERY && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -470,16 +471,18 @@ public class AddImagesActivity extends AppCompatActivity implements OnChangePic,
 
             startCrop(uri, Constants.CROP_CAMERA);
 
-        } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
+        } else if (requestCode == Constants.OPEN_GALLERY && resultCode == RESULT_OK) {
             if (data != null) {
 
-                try {
-
-                    Uri uri = data.getData();
-                    startCrop(uri,Constants.CROP_CAMERA);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+//                try {
+//
+//                    Uri uri = data.getData();
+//                    startCrop(uri,Constants.CROP_CAMERA);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+                uris.addAll(Matisse.obtainResult(data));
+                adapter.notifyDataSetChanged();
             }
 
 
