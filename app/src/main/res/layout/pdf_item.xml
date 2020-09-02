@@ -74,6 +74,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="5dp"
                 android:src="@drawable/ic_share_black_30dp"/>
+            <ImageView
+                android:id="@+id/pdf_download"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/download_30dp"/>
 
         <ImageView
             android:id="@+id/pdf_delete"

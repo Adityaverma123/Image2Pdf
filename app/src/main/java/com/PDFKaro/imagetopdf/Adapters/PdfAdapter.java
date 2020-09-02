@@ -160,6 +160,12 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                     context.startActivity(Intent.createChooser(shareIntent, "Share Pdf via:"));
                 }
             });
+            holder.pdf_download.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
 
     }
     private void deleteFile(String filename)
@@ -239,6 +245,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         ImageView list_image;
         TextView list_date;
         TextView list_time;
+        ImageView pdf_download;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -250,6 +257,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 list_image=itemView.findViewById(R.id.list_image);
                 list_date=itemView.findViewById(R.id.list_date);
                 list_time=itemView.findViewById(R.id.list_time);
+                pdf_download=itemView.findViewById(R.id.pdf_download);
 
 
         }
