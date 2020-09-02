@@ -163,6 +163,10 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             holder.pdf_download.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    String name=names.get(position);
+                    File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                    File file=new File(filePath.getAbsolutePath(),name);
+
 
                 }
             });
