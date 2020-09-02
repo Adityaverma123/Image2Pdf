@@ -129,9 +129,9 @@ public class    AddFileFragment extends Fragment implements OnChangePic, Visibil
 
             }
         });
+        List<String>finaluri=new ArrayList<>();
 
-
-        adapter = new ImageAdapter(context, uris, new ImageAdapter.OnItemClickListener() {
+        adapter = new ImageAdapter(context, uris,finaluri, new ImageAdapter.OnItemClickListener() {
             @Override
             public void onItemClicked(int position, View v) {
                 if (v instanceof ImageView) {

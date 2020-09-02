@@ -94,6 +94,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     ImageView backbtn;
+    List<String>finalUri;
     @SuppressLint("HandlerLeak")
     private int fromPos = -1;
     private int toPos = -1;
@@ -115,6 +116,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
         context=getContext();
         activity=getActivity();
+        finalUri=new ArrayList<>();
         parent = view.findViewById(R.id.parent);
         add_image = view.findViewById(R.id.add_image);
         uris = new ArrayList<>();
@@ -161,7 +163,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             }
         });
 
-        adapter = new ImageAdapter(context, uris, new ImageAdapter.OnItemClickListener() {
+        adapter = new ImageAdapter(context, uris,finalUri, new ImageAdapter.OnItemClickListener() {
             @Override
             public void onItemClicked(int position, View v) {
                 if (v instanceof ImageView) {
@@ -219,14 +221,18 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(20);
         recyclerView.setAdapter(adapter);
+
         return view;
     }
 
 
     private void moveItem(int oldPos, int newPos) {
         Uri temp = uris.get(oldPos);
+        String temp1=finalUri.get(oldPos);
         uris.set(oldPos, uris.get(newPos));
+        finalUri.set(oldPos,finalUri.get(newPos));
         uris.set(newPos, temp);
+        finalUri.set(newPos,temp1);
         adapter.notifyItemChanged(oldPos);
         adapter.notifyItemChanged(newPos);
     }
@@ -241,7 +247,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
     private class CreatePdfThread extends Thread{
         @Override
         public void run() {
-            List<String>finaluri=new ArrayList<>();
+
             try {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
@@ -254,10 +260,10 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                 Document document1 = new Document();
                 PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
                 document1.open();
-                for (int j = 0; j < uris.size(); j++) {
+                for (int j = 0; j < finalUri.size(); j++) {
                     int quality=30;
                     double qualitymode=quality*0.9;
-                    Image image=Image.getInstance(String.valueOf(uris.get(j)));
+                    Image image=Image.getInstance(String.valueOf(finalUri.get(j)));
                     image.setCompressionLevel((int) qualitymode);
                     image.setBorder(Rectangle.BOX);
                     image.setBorderWidth(0);
@@ -298,6 +304,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                             }
                         }).show();
                 uris.clear();
+                finalUri.clear();
                 adapter.notifyDataSetChanged();
             }
         };
@@ -481,6 +488,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                 try {
                     Uri imageUri = result.getUri();
                     uris.add(imageUri);
+                    finalUri.add(String.valueOf(imageUri));
                     InputStream input = context.getContentResolver().openInputStream(imageUri);
                     Bitmap bitmap = BitmapFactory.decodeStream(input);
                     Log.i("imageuri", imageUri.toString());
@@ -501,7 +509,6 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
         } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
             ClipData clipData=data.getClipData();
-            List<String>galleryUri=new ArrayList<>();
             if(clipData!=null)
             {
                 int count=clipData.getItemCount();
@@ -509,13 +516,15 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                 {
                     Uri uri=clipData.getItemAt(i).getUri();
                     uris.add(uri);
-                    galleryUri.add(getPath(uri));
+                    finalUri.add(getPath(uri));
+
                 }
             }
             else {
                 Uri uri=data.getData();
-                galleryUri.add(getPath(uri));
-                uris.add(Uri.parse(getPath(uri)));
+                finalUri.add(getPath(uri));
+
+                uris.add(uri);
             }
             Log.i("uris",uris.toString());
             adapter.notifyDataSetChanged();

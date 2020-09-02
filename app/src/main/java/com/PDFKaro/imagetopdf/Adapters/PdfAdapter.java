@@ -29,6 +29,7 @@ import com.PDFKaro.imagetopdf.Utils.Constants;
 import com.bumptech.glide.Glide;
 import com.PDFKaro.imagetopdf.R;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.List;
@@ -139,6 +140,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             });
             holder.list_name.setText(names.get(position));
         Glide.with(context).load(Uri.parse(uris.get(position))).into(holder.list_image);
+       // Picasso.get().load(Uri.parse(uris.get(position))).fit().into(holder.list_image);
            // holder.list_image.setImageURI(Uri.parse(uris.get(position)));
             holder.share.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.PDFKaro.imagetopdf.Interface.OnChangePic;
 import com.PDFKaro.imagetopdf.Interface.Visibility;
 import com.PDFKaro.imagetopdf.R;
+import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -35,6 +36,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     OnChangePic onChangePic;
     OnItemClickListener onItemClickListener;
     Visibility visibility;
+    List<String>finalUri;
 
     public int getCropNo() {
         return cropNo;
@@ -45,7 +47,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     }
 
     Activity activity;
-    public ImageAdapter(Context context,List<Uri>uris,OnItemClickListener onItemClickListener,Visibility visibility)
+    public ImageAdapter(Context context,List<Uri>uris,List<String>finalUri,OnItemClickListener onItemClickListener,Visibility visibility)
     {
         this.visibility=visibility;
         this.onItemClickListener=onItemClickListener;
@@ -53,6 +55,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
         this.context=context;
         this.uris=uris;
         this.activity=activity;
+        this.finalUri=finalUri;
     }
     @NonNull
     @Override
@@ -65,7 +68,8 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         //holder.imageView.setImageURI(uris.get(position));
-        Glide.with(context).load(uris.get(position)).into(holder.imageView);
+       // Glide.with(context).load(uris.get(position)).into(holder.imageView);
+        Picasso.get().load(uris.get(position)).fit().into(holder.imageView);
         holder.imageNo.setText("Image "+(position+1));
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,6 +81,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
             @Override
             public void onClick(View view) {
                 Log.i("button pressed","pressed");
+                finalUri.remove(position);
                 uris.remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position,uris.size());
