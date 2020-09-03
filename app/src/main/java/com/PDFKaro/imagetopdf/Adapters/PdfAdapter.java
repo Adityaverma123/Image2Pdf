@@ -164,7 +164,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
     private void deleteFile(String filename)
     {
-        File filePath= Environment.getExternalStorageDirectory();
+        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/PDFKaro");
         File file=new File(dir,filename);
         file.delete();
@@ -172,7 +172,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
     private File getImageFile(int position) {
 
-        File filePath= Environment.getExternalStorageDirectory();
+        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir=new File(filePath.getAbsolutePath()+"/PDFKaro");
 
         String fileName=names.get(position);

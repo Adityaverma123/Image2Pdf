@@ -251,14 +251,20 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             try {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-                File filePath = Environment.getExternalStorageDirectory();
+                File filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
                 File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
+                File dir1=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/PDFKaro");
                 if (!dir.exists()) {
                     dir.mkdir();
+                }
+                if(!dir1.exists())
+                {
+                    dir1.mkdir();
                 }
                 String  filename = System.currentTimeMillis() + ".pdf";
                 Document document1 = new Document();
                 PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
+                PdfWriter.getInstance(document1,new FileOutputStream(dir1+"/"+filename));
                 document1.open();
                 for (int j = 0; j < finalUri.size(); j++) {
                     int quality=30;
@@ -364,7 +370,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
     }
 
     private File getImageFile(String filename) {
-        File filePath = Environment.getExternalStorageDirectory();
+        File filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
         File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
         File file = new File(dir, filename);
         return file;
