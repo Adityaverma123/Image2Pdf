@@ -65,9 +65,12 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.scanlibrary.ScanActivity;
+import com.scanlibrary.ScanConstants;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -452,14 +455,17 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
     private void openCamera() throws IOException {
         dialog.dismiss();
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File file = getImageFile();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-            path = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID.concat(".provider"), file);
-        else
-            path = Uri.fromFile(file); // 3
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
+//        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        File file = getImageFile();
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+//            path = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID.concat(".provider"), file);
+//        else
+//            path = Uri.fromFile(file); // 3
+//        intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
+        int preference = ScanConstants.OPEN_CAMERA;
+        Intent intent = new Intent(context, ScanActivity.class);
+        intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, preference);
         startActivityForResult(intent, Constants.PICK_IMAGE);
     }
 
@@ -509,11 +515,23 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
             }
         } else if (requestCode == Constants.PICK_IMAGE && resultCode == RESULT_OK) {
-            Uri uri = Uri.parse(currentPhotoPath);
+//            Uri uri = Uri.parse(currentPhotoPath);
+//
+//            startCrop(uri, Constants.CROP_CAMERA);
+            Uri uri = data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT);
+            Bitmap bitmap = null;
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+               context.getContentResolver().delete(uri, null, null);
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-            startCrop(uri, Constants.CROP_CAMERA);
+                String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, "title", null);
+                uris.add(Uri.parse(path));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-        } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
+            } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
             ClipData clipData=data.getClipData();
             if(clipData!=null)
             {
