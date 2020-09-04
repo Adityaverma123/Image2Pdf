@@ -32,6 +32,7 @@ import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
@@ -40,8 +41,10 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     List<String >uris;
     List<String>dates;
     List<String>times;
-    public PdfAdapter(Context context, List<String>names,List<String>uris,List<String>dates,List<String>times)
+    List<String>finaluris;
+    public PdfAdapter(Context context, List<String>names,List<String>uris,List<String>dates,List<String>times,List<String>finaluris)
     {
+        this.finaluris=finaluris;
         this.times=times;
         this.dates=dates;
         this.uris=uris;
@@ -90,6 +93,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                         dates.remove(position);
                         uris.remove(position);
                         times.remove(position);
+                        finaluris.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position,names.size());
                         notifyDataSetChanged();
@@ -102,6 +106,8 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                         String image=gson.toJson(uris);
                         String date=gson.toJson(dates);
                         String time=gson.toJson(times);
+                        String finaluri=gson.toJson(finaluris);
+                        editor.putString("final_uri",finaluri);
                         editor.putString("task_list",json);
                         editor.putString("task_image",image);
                         editor.putString("task_date",date);
@@ -139,8 +145,19 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
             });
             holder.list_name.setText(names.get(position));
-        Glide.with(context).load(Uri.parse(uris.get(position))).into(holder.list_image);
-       // Picasso.get().load(Uri.parse(uris.get(position))).fit().into(holder.list_image);
+        File file = new File(finaluris.get(position));
+            if(file.exists()) {
+                Uri path;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    path = FileProvider.getUriForFile(context, "com.PDFKaro.imagetopdf.Utils.FileProvider", file);
+                else
+                    path = Uri.fromFile(file);
+                Glide.with(context).load(path).into(holder.list_image);
+            }
+            else Glide.with(context).load(uris.get(position)).into(holder.list_image);
+
+
+                // Picasso.get().load(Uri.parse(uris.get(position))).fit().into(holder.list_image);
            // holder.list_image.setImageURI(Uri.parse(uris.get(position)));
             holder.share.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -192,6 +209,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 dates.remove(position);
                 uris.remove(position);
                 times.remove(position);
+                finaluris.remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position,names.size());
                 notifyDataSetChanged();
@@ -204,10 +222,12 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 String image=gson.toJson(uris);
                 String date=gson.toJson(dates);
                 String time=gson.toJson(times);
+                String finaluri=gson.toJson(finaluris);
                 editor.putString("task_list",json);
                 editor.putString("task_image",image);
                 editor.putString("task_date",date);
                 editor.putString("task_time",time);
+                editor.putString("final_uri",finaluri);
                 editor.apply();
                 notifyDataSetChanged();
             }

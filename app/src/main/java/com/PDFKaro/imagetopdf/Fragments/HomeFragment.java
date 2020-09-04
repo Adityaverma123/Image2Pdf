@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -45,9 +46,9 @@ public class HomeFragment extends Fragment  {
     List<String>uris;
     List<String>dates;
     List<String>times;
+    List<String>finalUris;
     Context context;
     SwipeRefreshLayout refreshLayout;
-
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -87,19 +88,21 @@ public class HomeFragment extends Fragment  {
     private void buildRecyclerView(View view) {
         recyclerView =view.findViewById(R.id.pdf_list);
         recyclerView.setHasFixedSize(true);
-        adapter=new PdfAdapter(context,names,uris,dates,times);
+        adapter=new PdfAdapter(context,names,uris,dates,times,finalUris);
         LinearLayoutManager manager=new LinearLayoutManager(context);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
     }
 
-    private void insertData(String name,String uri) {
+
+    private void insertData(String name, String uri, String finaluri) {
 
         if(name!=null) {
             refreshLayout.setRefreshing(false);
             Log.i("name", name);
             names.add(0,name);
             uris.add(0,uri);
+            finalUris.add(0,finaluri);
             dates.add(0,getDate());
             times.add(0,getTime());
             adapter.notifyItemInserted(names.size());
@@ -131,12 +134,14 @@ public class HomeFragment extends Fragment  {
         Gson gson=new Gson();
         String json=gson.toJson(names);
         String image=gson.toJson(uris);
+        String finaluri=gson.toJson(finalUris);
         String date=gson.toJson(dates);
         String time=gson.toJson(times);
         editor.putString("task_list",json);
         editor.putString("task_image",image);
         editor.putString("task_date",date);
         editor.putString("task_time",time);
+        editor.putString("final_uri",finaluri);
         editor.apply();
     }
 
@@ -151,6 +156,7 @@ public class HomeFragment extends Fragment  {
         String image=sharedPreferences.getString("task_image",null);
         String date=sharedPreferences.getString("task_date",null);
         String time=sharedPreferences.getString("task_time",null);
+        String finaluri=sharedPreferences.getString("final_uri",null);
 
         Type type=new TypeToken<ArrayList<String>>(){}.getType();
         names=gson.fromJson(json,type);
@@ -176,10 +182,16 @@ public class HomeFragment extends Fragment  {
         {
             times=new ArrayList<>();
         }
+        Type typeFinaluri=new TypeToken<ArrayList<String>>(){}.getType();
+        finalUris=gson.fromJson(finaluri,typeFinaluri);
+        if (finalUris==null)
+        {
+            finalUris=new ArrayList<>();
+        }
     }
 
-    public void addReceivedName(String name,String uri)
+    public void addReceivedName(String name,String uri,String finaluri)
     {
-        insertData(name,uri);
+        insertData(name,uri,finaluri);
     }
 }

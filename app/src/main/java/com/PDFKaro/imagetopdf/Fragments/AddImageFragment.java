@@ -123,7 +123,6 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
         createPdf = view.findViewById(R.id.createPdfBtn);
         sharedPreferences=context.getSharedPreferences("Home2List",Context.MODE_PRIVATE);
         editor=sharedPreferences.edit();
-        showDialog();
         createPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -155,6 +154,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             }
 
         });
+        showDialog();
         add_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -253,18 +253,18 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
                 File filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
                 File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
-                File dir1=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/PDFKaro");
+                //File dir1=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/PDFKaro");
                 if (!dir.exists()) {
                     dir.mkdir();
                 }
-                if(!dir1.exists())
-                {
-                    dir1.mkdir();
-                }
+//                if(!dir1.exists())
+//                {
+//                    dir1.mkdir();
+//                }
                 String  filename = System.currentTimeMillis() + ".pdf";
                 Document document1 = new Document();
                 PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
-                PdfWriter.getInstance(document1,new FileOutputStream(dir1+"/"+filename));
+               // PdfWriter.getInstance(document1,new FileOutputStream(dir1+"/"+filename));
                 document1.open();
                 for (int j = 0; j < finalUri.size(); j++) {
                     int quality=30;
@@ -298,9 +298,9 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
             @Override
             public void handleMessage(Message msg) {
-
+                Log.i("finaluri",finalUri.get(0));
                 final String filename=(String)msg.obj;
-                refreshList.sendName(filename,uris.get(0).toString());
+                refreshList.sendName(filename,uris.get(0).toString(),finalUri.get(0));
 
                 Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
                         new View.OnClickListener() {
@@ -376,7 +376,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
         return file;
     }
 
-    private void showDialog() {
+    public void showDialog() {
 
         dialog = new Dialog(context, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -400,13 +400,14 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dialog.cancel();
                 add_image.setVisibility(View.VISIBLE);
                 try {
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                        requestPermissions( new String[]{Manifest.permission.CAMERA}, Constants.PICK_IMAGE);
 
                     } else {
-                        dialog.dismiss();
+
                         openCamera();
                     }
                 } catch (IOException e) {
@@ -418,11 +419,12 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
         gallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dialog.cancel();
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions( new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
 
                 } else {
-                    dialog.dismiss();
+
                     add_image.setVisibility(View.VISIBLE);
                     Log.i("Click", "Gallery clicked");
                     openGallery();
@@ -461,6 +463,12 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             path = Uri.fromFile(file); // 3
         intent.putExtra(MediaStore.EXTRA_OUTPUT, path);
         startActivityForResult(intent, Constants.PICK_IMAGE);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        dialog.cancel();
     }
 
     @Override
@@ -543,6 +551,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                 Uri imageUri = result.getUri();
                 Log.i("cropped uri", imageUri.toString());
                 uris.set(positionOfCrop, imageUri);
+                finalUri.set(positionOfCrop,imageUri.toString());
                 adapter.notifyItemChanged(positionOfCrop);
                 adapter.notifyDataSetChanged();
 
