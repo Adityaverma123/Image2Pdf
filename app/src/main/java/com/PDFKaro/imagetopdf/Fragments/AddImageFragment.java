@@ -67,6 +67,12 @@ import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+import com.zhihu.matisse.Matisse;
+import com.zhihu.matisse.MimeType;
+import com.zhihu.matisse.engine.impl.GlideEngine;
+import com.zhihu.matisse.engine.impl.PicassoEngine;
+import com.zhihu.matisse.internal.entity.CaptureStrategy;
+import com.zhihu.matisse.listener.OnSelectedListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -101,6 +107,8 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
     Context context;
     Activity activity;
     RefreshList refreshList;
+    private static final int INTENT_REQUEST_GET_IMAGES = 13;
+
     public AddImageFragment() {
         // Required empty public constructor
     }
@@ -359,13 +367,29 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
     @SuppressLint("IntentReset")
     private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/*");
-        String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        startActivityForResult(intent, Constants.OPENGALLERY);
+//        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        intent.setType("image/*");
+//        String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
+//        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+//        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+//        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//        startActivityForResult(intent, Constants.OPENGALLERY);
+        Matisse.from(activity)
+                .choose(MimeType.ofImage(), false)
+                .countable(true)
+                .capture(false)
+                .captureStrategy(new CaptureStrategy(true, "com.zhihu.matisse.sample.fileprovider","test"))
+                .maxSelectable(30)
+                .setOnSelectedListener(new OnSelectedListener() {
+                    @Override
+                    public void onSelected(@NonNull List<Uri> uriList, @NonNull List<String> pathList) {
+                        Log.i("uriList",uriList.get(0).toString());
+                        Log.i("pathList",pathList.get(0).toString());
+                    }
+                })
+                .imageEngine(new GlideEngine())
+                .forResult(INTENT_REQUEST_GET_IMAGES);
+
 
     }
 
@@ -521,26 +545,28 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
             startCrop(uri, Constants.CROP_CAMERA);
 
-        } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
-            ClipData clipData=data.getClipData();
-            if(clipData!=null)
-            {
-                int count=clipData.getItemCount();
-                for(int i=0;i<count;i++)
-                {
-                    Uri uri=clipData.getItemAt(i).getUri();
-                    uris.add(uri);
-                    finalUri.add(getPath(uri));
+        } else if (requestCode == INTENT_REQUEST_GET_IMAGES&& resultCode == RESULT_OK) {
+//            ClipData clipData=data.getClipData();
+//            if(clipData!=null)
+//            {
+//                int count=clipData.getItemCount();
+//                for(int i=0;i<count;i++)
+//                {
+//                    Uri uri=clipData.getItemAt(i).getUri();
+//                    uris.add(uri);
+//                    finalUri.add(getPath(uri));
+//
+//                }
+//            }
+//            else {
+//                Uri uri=data.getData();
+//                finalUri.add(getPath(uri));
+//
+//                uris.add(uri);
+//            }
+//            Log.i("uris",uris.toString());
+//            adapter.notifyDataSetChanged();
 
-                }
-            }
-            else {
-                Uri uri=data.getData();
-                finalUri.add(getPath(uri));
-
-                uris.add(uri);
-            }
-            Log.i("uris",uris.toString());
             adapter.notifyDataSetChanged();
 
 
