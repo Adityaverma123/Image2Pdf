@@ -374,17 +374,20 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 //        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
 //        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 //        startActivityForResult(intent, Constants.OPENGALLERY);
-        Matisse.from(activity)
+        Matisse.from(this)
                 .choose(MimeType.ofImage(), false)
                 .countable(true)
+                .theme(R.style.Matisse_Dracula)
                 .capture(false)
                 .captureStrategy(new CaptureStrategy(true, "com.zhihu.matisse.sample.fileprovider","test"))
                 .maxSelectable(30)
                 .setOnSelectedListener(new OnSelectedListener() {
                     @Override
                     public void onSelected(@NonNull List<Uri> uriList, @NonNull List<String> pathList) {
-                        Log.i("uriList",uriList.get(0).toString());
-                        Log.i("pathList",pathList.get(0).toString());
+//                        Log.i("uriList",uriList.get(0).toString());
+//                        Log.i("pathList",pathList.get(0).toString());
+//                        uris.add(uriList.get(0));
+//                        adapter.notifyDataSetChanged();
                     }
                 })
                 .imageEngine(new GlideEngine())
@@ -545,7 +548,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
             startCrop(uri, Constants.CROP_CAMERA);
 
-        } else if (requestCode == INTENT_REQUEST_GET_IMAGES&& resultCode == RESULT_OK) {
+        } else if (requestCode == INTENT_REQUEST_GET_IMAGES && resultCode == RESULT_OK) {
 //            ClipData clipData=data.getClipData();
 //            if(clipData!=null)
 //            {
@@ -566,7 +569,13 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 //            }
 //            Log.i("uris",uris.toString());
 //            adapter.notifyDataSetChanged();
-
+            for (Uri uri : Matisse.obtainResult(data)) {
+                uris.add(uri);
+            }
+            for (String path : Matisse.obtainPathResult(data))
+            {
+                finalUri.add(path);
+            }
             adapter.notifyDataSetChanged();
 
 
