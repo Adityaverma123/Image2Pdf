@@ -41,9 +41,10 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     List<String >uris;
     List<String>dates;
     List<String>times;
-    public PdfAdapter(Context context, List<String>names,List<String>uris,List<String>dates,List<String>times)
+    List<String>finalUris;
+    public PdfAdapter(Context context, List<String>names,List<String>uris,List<String>dates,List<String>times, List<String>finalUris)
     {
-
+        this.finalUris=finalUris;
         this.times=times;
         this.dates=dates;
         this.uris=uris;
@@ -141,7 +142,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
             });
             holder.list_name.setText(names.get(position));
-        Glide.with(context).load(uris.get(position)).into(holder.list_image);
+
 
 
                 // Picasso.get().load(Uri.parse(uris.get(position))).fit().into(holder.list_image);

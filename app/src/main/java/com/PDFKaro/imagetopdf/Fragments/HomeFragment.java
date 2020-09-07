@@ -47,6 +47,7 @@ public class HomeFragment extends Fragment  {
     List<String>dates;
     List<String>times;
     Context context;
+    List<String>finaluris;
     SwipeRefreshLayout refreshLayout;
     public HomeFragment() {
         // Required empty public constructor
@@ -87,21 +88,21 @@ public class HomeFragment extends Fragment  {
     private void buildRecyclerView(View view) {
         recyclerView =view.findViewById(R.id.pdf_list);
         recyclerView.setHasFixedSize(true);
-        adapter=new PdfAdapter(context,names,uris,dates,times);
+        adapter=new PdfAdapter(context,names,uris,dates,times,finaluris);
         LinearLayoutManager manager=new LinearLayoutManager(context);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
     }
 
 
-    private void insertData(String name, String uri) {
+    private void insertData(String name, String uri,String finalUri) {
 
         if(name!=null) {
             refreshLayout.setRefreshing(false);
             Log.i("name", name);
             names.add(0,name);
             uris.add(0,uri);
-
+            finaluris.add(0,finalUri);
             dates.add(0,getDate());
             times.add(0,getTime());
             adapter.notifyItemInserted(names.size());
@@ -135,10 +136,12 @@ public class HomeFragment extends Fragment  {
         String image=gson.toJson(uris);
         String date=gson.toJson(dates);
         String time=gson.toJson(times);
+        String finalUri=gson.toJson(finaluris);
         editor.putString("task_list",json);
         editor.putString("task_image",image);
         editor.putString("task_date",date);
         editor.putString("task_time",time);
+        editor.putString("final_uri",finalUri);
 
         editor.apply();
     }
@@ -180,11 +183,17 @@ public class HomeFragment extends Fragment  {
         {
             times=new ArrayList<>();
         }
+        Type typepath=new TypeToken<ArrayList<String>>(){}.getType();
+        finaluris=gson.fromJson(finaluri,typepath);
+        if(finaluris==null)
+        {
+            finaluris=new ArrayList<>();
+        }
 
     }
 
-    public void addReceivedName(String name,String uri)
+    public void addReceivedName(String name,String uri,String finalUri)
     {
-        insertData(name,uri);
+        insertData(name,uri,finalUri);
     }
 }

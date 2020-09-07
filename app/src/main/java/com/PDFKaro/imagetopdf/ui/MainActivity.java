@@ -89,9 +89,9 @@ public class MainActivity extends AppCompatActivity implements RefreshList {
     }
 
     @Override
-    public void sendName(String name,String uri) {
+    public void sendName(String name,String uri,String finalUri) {
 
-        homeFragment.addReceivedName(name,uri);
+        homeFragment.addReceivedName(name,uri,finalUri);
     }
 
 }

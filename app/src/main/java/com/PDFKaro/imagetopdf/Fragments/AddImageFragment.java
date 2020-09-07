@@ -309,7 +309,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             public void handleMessage(Message msg) {
                 Log.i("finaluri",finalUri.get(0));
                 final String filename=(String)msg.obj;
-                refreshList.sendName(filename,uris.get(0).toString());
+                refreshList.sendName(filename,uris.get(0).toString(),finalUri.get(0));
 
                 Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
                         new View.OnClickListener() {
