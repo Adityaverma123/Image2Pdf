@@ -259,20 +259,21 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             try {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-                File filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+                File filePath = context.getExternalFilesDir(null);
                 File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
-                //File dir1=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/PDFKaro");
+                File dir1=Environment.getExternalStoragePublicDirectory("PDFKaro");
                 if (!dir.exists()) {
                     dir.mkdir();
+                    Log.i("dir", String.valueOf(dir));
                 }
-//                if(!dir1.exists())
-//                {
-//                    dir1.mkdir();
-//                }
+                if(!dir1.exists())
+                {
+                    dir1.mkdir();
+                }
                 String  filename = System.currentTimeMillis() + ".pdf";
                 Document document1 = new Document();
                 PdfWriter.getInstance(document1, new FileOutputStream(dir + "/" + filename));
-               // PdfWriter.getInstance(document1,new FileOutputStream(dir1+"/"+filename));
+                PdfWriter.getInstance(document1,new FileOutputStream(dir1+"/"+filename));
                 document1.open();
                 for (int j = 0; j < finalUri.size(); j++) {
                     int quality=30;
@@ -308,7 +309,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             public void handleMessage(Message msg) {
                 Log.i("finaluri",finalUri.get(0));
                 final String filename=(String)msg.obj;
-                refreshList.sendName(filename,uris.get(0).toString(),finalUri.get(0));
+                refreshList.sendName(filename,uris.get(0).toString());
 
                 Snackbar.make(parent,"Pdf saved",Snackbar.LENGTH_LONG).setAction("Open",
                         new View.OnClickListener() {
@@ -391,13 +392,13 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                     }
                 })
                 .imageEngine(new GlideEngine())
-                .forResult(INTENT_REQUEST_GET_IMAGES);
+                .forResult(Constants.OPENGALLERY);
 
 
     }
 
     private File getImageFile(String filename) {
-        File filePath = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        File filePath = context.getExternalFilesDir(null);
         File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
         File file = new File(dir, filename);
         return file;
@@ -548,7 +549,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
             startCrop(uri, Constants.CROP_CAMERA);
 
-        } else if (requestCode == INTENT_REQUEST_GET_IMAGES && resultCode == RESULT_OK) {
+        } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
 //            ClipData clipData=data.getClipData();
 //            if(clipData!=null)
 //            {

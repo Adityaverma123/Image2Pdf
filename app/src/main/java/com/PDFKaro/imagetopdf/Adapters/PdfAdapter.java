@@ -41,10 +41,9 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     List<String >uris;
     List<String>dates;
     List<String>times;
-    List<String>finaluris;
-    public PdfAdapter(Context context, List<String>names,List<String>uris,List<String>dates,List<String>times,List<String>finaluris)
+    public PdfAdapter(Context context, List<String>names,List<String>uris,List<String>dates,List<String>times)
     {
-        this.finaluris=finaluris;
+
         this.times=times;
         this.dates=dates;
         this.uris=uris;
@@ -93,7 +92,6 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                         dates.remove(position);
                         uris.remove(position);
                         times.remove(position);
-                        finaluris.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position,names.size());
                         notifyDataSetChanged();
@@ -106,8 +104,6 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                         String image=gson.toJson(uris);
                         String date=gson.toJson(dates);
                         String time=gson.toJson(times);
-                        String finaluri=gson.toJson(finaluris);
-                        editor.putString("final_uri",finaluri);
                         editor.putString("task_list",json);
                         editor.putString("task_image",image);
                         editor.putString("task_date",date);
@@ -145,16 +141,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
             });
             holder.list_name.setText(names.get(position));
-        File file = new File(finaluris.get(position));
-            if(file.exists()) {
-                Uri path;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                    path = FileProvider.getUriForFile(context, "com.PDFKaro.imagetopdf.Utils.FileProvider", file);
-                else
-                    path = Uri.fromFile(file);
-                Glide.with(context).load(path).into(holder.list_image);
-            }
-            else Glide.with(context).load(uris.get(position)).into(holder.list_image);
+        Glide.with(context).load(uris.get(position)).into(holder.list_image);
 
 
                 // Picasso.get().load(Uri.parse(uris.get(position))).fit().into(holder.list_image);
@@ -181,15 +168,15 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     }
     private void deleteFile(String filename)
     {
-        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-        File dir=new File(filePath.getAbsolutePath()+"/PDFKaro");
+        File filePath= context.getExternalFilesDir(null);
+        File dir=new File(filePath.getPath()+"/PDFKaro");
         File file=new File(dir,filename);
         file.delete();
     }
 
     private File getImageFile(int position) {
 
-        File filePath= context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        File filePath= context.getExternalFilesDir(null);
         File dir=new File(filePath.getAbsolutePath()+"/PDFKaro");
 
         String fileName=names.get(position);
@@ -209,7 +196,6 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 dates.remove(position);
                 uris.remove(position);
                 times.remove(position);
-                finaluris.remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position,names.size());
                 notifyDataSetChanged();
@@ -222,12 +208,10 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 String image=gson.toJson(uris);
                 String date=gson.toJson(dates);
                 String time=gson.toJson(times);
-                String finaluri=gson.toJson(finaluris);
                 editor.putString("task_list",json);
                 editor.putString("task_image",image);
                 editor.putString("task_date",date);
                 editor.putString("task_time",time);
-                editor.putString("final_uri",finaluri);
                 editor.apply();
                 notifyDataSetChanged();
             }

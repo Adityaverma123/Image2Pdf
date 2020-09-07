@@ -80,7 +80,7 @@ public class HomeActivity extends AppCompatActivity implements RefreshList {
     private void buildRecyclerView() {
         recyclerView = findViewById(R.id.pdf_list);
         recyclerView.setHasFixedSize(true);
-        adapter=new PdfAdapter(this,names,uris,dates,times,finaluri);
+        adapter=new PdfAdapter(this,names,uris,dates,times);
         LinearLayoutManager manager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
@@ -172,7 +172,7 @@ public class HomeActivity extends AppCompatActivity implements RefreshList {
     }
 
     @Override
-    public void sendName(String name, String uri,String finaluri) {
+    public void sendName(String name, String uri) {
         insertData(name,uri);
     }
 }
