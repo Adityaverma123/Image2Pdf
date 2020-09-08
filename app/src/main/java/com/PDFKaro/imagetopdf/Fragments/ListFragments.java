@@ -67,7 +67,7 @@ public class ListFragments extends Fragment {
     private void buildRecyclerView(View view) {
         recyclerView = view.findViewById(R.id.pdf_list);
         recyclerView.setHasFixedSize(true);
-        adapter=new PdfAdapter(context,names,uris,dates,times);
+        adapter=new PdfAdapter(context,names,uris,dates,times,finalUri);
         LinearLayoutManager manager=new LinearLayoutManager(context);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);

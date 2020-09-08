@@ -105,10 +105,12 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                         String image=gson.toJson(uris);
                         String date=gson.toJson(dates);
                         String time=gson.toJson(times);
+                        String path=gson.toJson(finalUris);
                         editor.putString("task_list",json);
                         editor.putString("task_image",image);
                         editor.putString("task_date",date);
                         editor.putString("task_time",time);
+                        editor.putString("final_uri",path);
                         editor.apply();
                         notifyDataSetChanged();
                         Toast.makeText(context, "Item doesn't exist", Toast.LENGTH_SHORT).show();
@@ -143,9 +145,19 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             });
             holder.list_name.setText(names.get(position));
 
+        File file = new File(finalUris.get(position));
+        if(file.exists()) {
+            Uri path;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                path = FileProvider.getUriForFile(context, "com.PDFKaro.imagetopdf.Utils.FileProvider", file);
+            else
+                path = Uri.fromFile(file);
+            Glide.with(context).load(path).into(holder.list_image);
+        }
+        else Glide.with(context).load(uris.get(position)).into(holder.list_image);
 
 
-                // Picasso.get().load(Uri.parse(uris.get(position))).fit().into(holder.list_image);
+        // Picasso.get().load(Uri.parse(uris.get(position))).fit().into(holder.list_image);
            // holder.list_image.setImageURI(Uri.parse(uris.get(position)));
             holder.share.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -209,10 +221,13 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 String image=gson.toJson(uris);
                 String date=gson.toJson(dates);
                 String time=gson.toJson(times);
+                String path=gson.toJson(finalUris);
                 editor.putString("task_list",json);
                 editor.putString("task_image",image);
                 editor.putString("task_date",date);
                 editor.putString("task_time",time);
+                editor.putString("final_uri",path);
+
                 editor.apply();
                 notifyDataSetChanged();
             }

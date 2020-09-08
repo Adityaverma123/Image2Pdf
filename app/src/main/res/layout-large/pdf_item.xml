@@ -32,7 +32,7 @@
         <LinearLayout
             android:padding="5dp"
             android:layout_marginTop="10dp"
-            android:layout_marginStart="5dp"
+            android:paddingStart="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/card_image"
@@ -51,7 +51,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
-                android:text="October 2018"
+                android:layout_marginStart="5dp"
+
+                android:text=" October 2018"
                 android:fontFamily="@font/caviar_dreams"
                 android:layout_marginTop="15dp"/>
             <TextView

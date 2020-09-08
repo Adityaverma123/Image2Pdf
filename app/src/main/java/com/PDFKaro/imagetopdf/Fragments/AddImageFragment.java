@@ -447,13 +447,14 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
         gallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                add_image.setVisibility(View.VISIBLE);
                 dialog.cancel();
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions( new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.OPENGALLERY);
 
                 } else {
 
-                    add_image.setVisibility(View.VISIBLE);
+
                     Log.i("Click", "Gallery clicked");
                     openGallery();
                 }
