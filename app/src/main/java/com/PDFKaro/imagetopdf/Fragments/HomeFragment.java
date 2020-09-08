@@ -1,11 +1,14 @@
 package com.PDFKaro.imagetopdf.Fragments;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -13,18 +16,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-
 import com.PDFKaro.imagetopdf.Adapters.PdfAdapter;
-import com.PDFKaro.imagetopdf.Interface.RefreshList;
 import com.PDFKaro.imagetopdf.R;
 import com.PDFKaro.imagetopdf.Utils.Constants;
-import com.PDFKaro.imagetopdf.ui.AddImagesActivity;
-import com.PDFKaro.imagetopdf.ui.HomeActivity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
