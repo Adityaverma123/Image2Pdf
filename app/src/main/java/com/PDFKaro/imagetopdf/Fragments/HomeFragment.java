@@ -26,6 +26,7 @@ import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -36,12 +37,12 @@ public class HomeFragment extends Fragment  {
     SharedPreferences.Editor editor;
     SharedPreferences sharedPreferences;
     PdfAdapter adapter;
-    List<String> names;
-    List<String>uris;
-    List<String>dates;
-    List<String>times;
+    LinkedList<String> names;
+    LinkedList<String>uris;
+    LinkedList<String>dates;
+    LinkedList<String>times;
     Context context;
-    List<String>finaluris;
+    LinkedList<String>finaluris;
     SwipeRefreshLayout refreshLayout;
     public HomeFragment() {
         // Required empty public constructor
@@ -94,11 +95,16 @@ public class HomeFragment extends Fragment  {
         if(name!=null) {
             refreshLayout.setRefreshing(false);
             Log.i("name", name);
-            names.add(0,name);
+//            names.add(0,name);
+            names.addFirst(name);
             uris.add(0,uri);
-            finaluris.add(0,finalUri);
-            dates.add(0,getDate());
-            times.add(0,getTime());
+            uris.addFirst(uri);
+//            finaluris.add(0,finalUri);
+            uris.addFirst(finalUri);
+//            dates.add(0,getDate());
+            dates.addFirst(getDate());
+            //times.add(0,getTime());
+            times.addFirst(getTime());
             adapter.notifyItemInserted(names.size());
             saveData();
             preferences.edit().clear().apply();
@@ -136,7 +142,6 @@ public class HomeFragment extends Fragment  {
         editor.putString("task_date",date);
         editor.putString("task_time",time);
         editor.putString("final_uri",finalUri);
-
         editor.apply();
     }
 
@@ -153,35 +158,35 @@ public class HomeFragment extends Fragment  {
         String time=sharedPreferences.getString("task_time",null);
         String finaluri=sharedPreferences.getString("final_uri",null);
 
-        Type type=new TypeToken<ArrayList<String>>(){}.getType();
+        Type type=new TypeToken<LinkedList<String>>(){}.getType();
         names=gson.fromJson(json,type);
         if(names==null)
         {
-            names=new ArrayList<>();
+            names=new LinkedList<>();
         }
-        Type typeimage=new TypeToken<ArrayList<String>>(){}.getType();
+        Type typeimage=new TypeToken<LinkedList<String>>(){}.getType();
         uris=gson.fromJson(image,typeimage);
         if(uris==null)
         {
-            uris=new ArrayList<>();
+            uris=new LinkedList<>();
         }
-        Type typeDate=new TypeToken<ArrayList<String>>(){}.getType();
+        Type typeDate=new TypeToken<LinkedList<String>>(){}.getType();
         dates=gson.fromJson(date,typeDate);
         if(dates==null)
         {
-            dates=new ArrayList<>();
+            dates=new LinkedList<>();
         }
-        Type typeTime=new TypeToken<ArrayList<String>>(){}.getType();
+        Type typeTime=new TypeToken<LinkedList<String>>(){}.getType();
         times=gson.fromJson(time,typeTime);
         if(times==null)
         {
-            times=new ArrayList<>();
+            times=new LinkedList<>();
         }
-        Type typepath=new TypeToken<ArrayList<String>>(){}.getType();
+        Type typepath=new TypeToken<LinkedList<String>>(){}.getType();
         finaluris=gson.fromJson(finaluri,typepath);
         if(finaluris==null)
         {
-            finaluris=new ArrayList<>();
+            finaluris=new LinkedList<>();
         }
 
     }

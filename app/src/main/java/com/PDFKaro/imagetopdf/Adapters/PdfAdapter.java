@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,16 +34,17 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.LinkedList;
 import java.util.List;
 
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     Context context;
-    List<String >names;
-    List<String >uris;
-    List<String>dates;
-    List<String>times;
-    List<String>finalUris;
-    public PdfAdapter(Context context, List<String>names,List<String>uris,List<String>dates,List<String>times, List<String>finalUris)
+    LinkedList<String > names;
+    LinkedList<String >uris;
+    LinkedList<String>dates;
+    LinkedList<String>times;
+    LinkedList<String>finalUris;
+    public PdfAdapter(Context context, LinkedList<String>names,LinkedList<String>uris,LinkedList<String>dates,LinkedList<String>times, LinkedList<String>finalUris)
     {
         this.finalUris=finalUris;
         this.times=times;
@@ -65,6 +67,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+        try {
             holder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -118,6 +121,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 }
 
             });
+
             holder.list_date.setText(dates.get(position));
             holder.list_time.setText(times.get(position));
             holder.delete.setOnClickListener(new View.OnClickListener() {
@@ -144,18 +148,23 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
             });
             holder.list_name.setText(names.get(position));
+                if(finalUris.size()==0)
+                {
+                    return;
+                }
+                File file = new File(finalUris.get(position));
 
-        File file = new File(finalUris.get(position));
-        if(file.exists()) {
-            Uri path;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                path = FileProvider.getUriForFile(context, "com.PDFKaro.imagetopdf.Utils.FileProvider", file);
-            else
-                path = Uri.fromFile(file);
-            Glide.with(context).load(path).into(holder.list_image);
-        }
-        else Glide.with(context).load(uris.get(position)).into(holder.list_image);
-
+            if (file.exists()) {
+                Uri path;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                    path = FileProvider.getUriForFile(context, "com.PDFKaro.imagetopdf.Utils.FileProvider", file);
+                else
+                    path = Uri.fromFile(file);
+                Picasso.get().load(path).fit().into(holder.list_image);
+                //Glide.with(context).load(path).into(holder.list_image);
+            } else
+             Picasso.get().load(uris.get(position)).fit().into(holder.list_image);
+            //Glide.with(context).load(uris.get(position)).into(holder.list_image);
 
         // Picasso.get().load(Uri.parse(uris.get(position))).fit().into(holder.list_image);
            // holder.list_image.setImageURI(Uri.parse(uris.get(position)));
@@ -177,6 +186,11 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                     context.startActivity(Intent.createChooser(shareIntent, "Share Pdf via:"));
                 }
             });
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
     }
     private void deleteFile(String filename)
