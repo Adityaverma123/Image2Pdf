@@ -26,6 +26,7 @@ import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.PDFKaro.imagetopdf.Utils.Constants;
+import com.PDFKaro.imagetopdf.Utils.PdfItem;
 import com.bumptech.glide.Glide;
 import com.PDFKaro.imagetopdf.R;
 import com.google.gson.Gson;
@@ -37,19 +38,17 @@ import java.util.List;
 
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     Context context;
-    List<String >names;
-    List<String >uris;
-    List<String>dates;
-    List<String>times;
-    List<String>finalUris;
-    public PdfAdapter(Context context, List<String>names,List<String>uris,List<String>dates,List<String>times, List<String>finalUris)
+//    List<String >names;
+//    List<String >uris;
+//    List<String>dates;
+//    List<String>times;
+//    List<String>finalUris;
+    List<PdfItem>items;
+    public PdfAdapter(Context context,List<PdfItem>items )
     {
-        this.finalUris=finalUris;
-        this.times=times;
-        this.dates=dates;
-        this.uris=uris;
+        this.items=items;
         this.context=context;
-        this.names=names;
+
     }
     @NonNull
     @Override
@@ -65,6 +64,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+
             holder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -89,28 +89,20 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                             Toast.makeText(context, "No Application available to view pdf", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        names.remove(position);
-                        dates.remove(position);
-                        uris.remove(position);
-                        times.remove(position);
+
+                        items.remove(position);
                         notifyItemRemoved(position);
-                        notifyItemRangeChanged(position,names.size());
+                        notifyItemRangeChanged(position,items.size());
                         notifyDataSetChanged();
                         SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
                         preferences.edit().clear().apply();
 
                         SharedPreferences.Editor editor=preferences.edit();
                         Gson gson=new Gson();
-                        String json=gson.toJson(names);
-                        String image=gson.toJson(uris);
-                        String date=gson.toJson(dates);
-                        String time=gson.toJson(times);
-                        String path=gson.toJson(finalUris);
+                        String json=gson.toJson(items);
+
                         editor.putString("task_list",json);
-                        editor.putString("task_image",image);
-                        editor.putString("task_date",date);
-                        editor.putString("task_time",time);
-                        editor.putString("final_uri",path);
+
                         editor.apply();
                         notifyDataSetChanged();
                         Toast.makeText(context, "Item doesn't exist", Toast.LENGTH_SHORT).show();
@@ -118,8 +110,8 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 }
 
             });
-            holder.list_date.setText(dates.get(position));
-            holder.list_time.setText(times.get(position));
+            holder.list_date.setText(items.get(position).getDate());
+            holder.list_time.setText(items.get(position).getTime());
             holder.delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -143,9 +135,9 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 }
 
             });
-            holder.list_name.setText(names.get(position));
+            holder.list_name.setText(items.get(position).getNames());
 
-        File file = new File(finalUris.get(position));
+        File file = new File(items.get(position).getPath());
         if(file.exists()) {
             Uri path;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
@@ -154,7 +146,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 path = Uri.fromFile(file);
             Glide.with(context).load(path).into(holder.list_image);
         }
-        else Glide.with(context).load(uris.get(position)).into(holder.list_image);
+        else Glide.with(context).load(items.get(position).getUri()).into(holder.list_image);
 
 
         // Picasso.get().load(Uri.parse(uris.get(position))).fit().into(holder.list_image);
@@ -189,11 +181,13 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
     private File getImageFile(int position) {
 
-        File filePath= context.getExternalFilesDir(null);
-        File dir=new File(filePath.getAbsolutePath()+"/PDFKaro");
 
-        String fileName=names.get(position);
-        File file=new File(dir,fileName);
+            File filePath = context.getExternalFilesDir(null);
+            File dir = new File(filePath.getAbsolutePath() + "/PDFKaro");
+
+            String fileName = items.get(position).getNames();
+            File file = new File(dir, fileName);
+
         return file;
     }
     private void deleteItem(View rowView,final int position)
@@ -204,29 +198,30 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                deleteFile(names.get(position));
-                names.remove(position);
-                dates.remove(position);
-                uris.remove(position);
-                times.remove(position);
+                deleteFile(items.get(position).getNames());
+//                names.remove(position);
+//                dates.remove(position);
+//                uris.remove(position);
+//                times.remove(position);
+                items.remove(position);
                 notifyItemRemoved(position);
-                notifyItemRangeChanged(position,names.size());
+                notifyItemRangeChanged(position,items.size());
                 notifyDataSetChanged();
                 SharedPreferences preferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
                 preferences.edit().clear().apply();
 
                 SharedPreferences.Editor editor=preferences.edit();
                 Gson gson=new Gson();
-                String json=gson.toJson(names);
-                String image=gson.toJson(uris);
-                String date=gson.toJson(dates);
-                String time=gson.toJson(times);
-                String path=gson.toJson(finalUris);
+                String json=gson.toJson(items);
+//                String image=gson.toJson(uris);
+//                String date=gson.toJson(dates);
+//                String time=gson.toJson(times);
+//                String path=gson.toJson(finalUris);
                 editor.putString("task_list",json);
-                editor.putString("task_image",image);
-                editor.putString("task_date",date);
-                editor.putString("task_time",time);
-                editor.putString("final_uri",path);
+//                editor.putString("task_image",image);
+//                editor.putString("task_date",date);
+//                editor.putString("task_time",time);
+//                editor.putString("final_uri",path);
 
                 editor.apply();
                 notifyDataSetChanged();
@@ -236,17 +231,12 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
     }
 
-    @Override
-    public int getItemViewType(int position) {
 
-        return names.size();
-
-    }
 
     @Override
     public int getItemCount() {
 
-        return names.size();
+        return items.size();
     }
 
 

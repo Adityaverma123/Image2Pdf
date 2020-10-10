@@ -19,6 +19,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.PDFKaro.imagetopdf.Adapters.PdfAdapter;
 import com.PDFKaro.imagetopdf.R;
 import com.PDFKaro.imagetopdf.Utils.Constants;
+import com.PDFKaro.imagetopdf.Utils.PdfItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -36,15 +37,11 @@ public class HomeFragment extends Fragment  {
     SharedPreferences.Editor editor;
     SharedPreferences sharedPreferences;
     PdfAdapter adapter;
-    List<String> names;
-    List<String>uris;
-    List<String>dates;
-    List<String>times;
+    List<PdfItem>items;
     Context context;
-    List<String>finaluris;
     SwipeRefreshLayout refreshLayout;
     public HomeFragment() {
-        // Required empty public constructor
+
     }
 
 
@@ -57,8 +54,6 @@ public class HomeFragment extends Fragment  {
         context=getContext();
         add_image=view.findViewById(R.id.add_image_home);
         recyclerView = view.findViewById(R.id.pdf_list);
-        preferences=context.getSharedPreferences("Home2List", Context.MODE_PRIVATE);
-
         add_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,6 +70,7 @@ public class HomeFragment extends Fragment  {
                 loadData();
             }
         });
+
         loadData();
         buildRecyclerView(view);
         return  view;
@@ -82,7 +78,7 @@ public class HomeFragment extends Fragment  {
     private void buildRecyclerView(View view) {
         recyclerView =view.findViewById(R.id.pdf_list);
         recyclerView.setHasFixedSize(true);
-        adapter=new PdfAdapter(context,names,uris,dates,times,finaluris);
+        adapter=new PdfAdapter(context,items);
         LinearLayoutManager manager=new LinearLayoutManager(context);
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
@@ -91,18 +87,14 @@ public class HomeFragment extends Fragment  {
 
     private void insertData(String name, String uri,String finalUri) {
 
-        if(name!=null) {
+
             refreshLayout.setRefreshing(false);
             Log.i("name", name);
-            names.add(0,name);
-            uris.add(0,uri);
-            finaluris.add(0,finalUri);
-            dates.add(0,getDate());
-            times.add(0,getTime());
-            adapter.notifyItemInserted(names.size());
+            items.add(0,new PdfItem(name,getTime(),uri,getDate(),finalUri));
+            adapter.notifyItemInserted(items.size());
             saveData();
             preferences.edit().clear().apply();
-        }
+
 
     }
     private String getDate()
@@ -126,17 +118,8 @@ public class HomeFragment extends Fragment  {
         sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
         editor=sharedPreferences.edit();
         Gson gson=new Gson();
-        String json=gson.toJson(names);
-        String image=gson.toJson(uris);
-        String date=gson.toJson(dates);
-        String time=gson.toJson(times);
-        String finalUri=gson.toJson(finaluris);
+        String json=gson.toJson(items);
         editor.putString("task_list",json);
-        editor.putString("task_image",image);
-        editor.putString("task_date",date);
-        editor.putString("task_time",time);
-        editor.putString("final_uri",finalUri);
-
         editor.apply();
     }
 
@@ -148,41 +131,13 @@ public class HomeFragment extends Fragment  {
         SharedPreferences sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
         Gson gson=new Gson();
         String json=sharedPreferences.getString("task_list",null);
-        String image=sharedPreferences.getString("task_image",null);
-        String date=sharedPreferences.getString("task_date",null);
-        String time=sharedPreferences.getString("task_time",null);
-        String finaluri=sharedPreferences.getString("final_uri",null);
+        Type type=new TypeToken<ArrayList<PdfItem>>(){}.getType();
+        items=gson.fromJson(json,type);
+        if(items==null)
+        {
+            items=new ArrayList<>();
+        }
 
-        Type type=new TypeToken<ArrayList<String>>(){}.getType();
-        names=gson.fromJson(json,type);
-        if(names==null)
-        {
-            names=new ArrayList<>();
-        }
-        Type typeimage=new TypeToken<ArrayList<String>>(){}.getType();
-        uris=gson.fromJson(image,typeimage);
-        if(uris==null)
-        {
-            uris=new ArrayList<>();
-        }
-        Type typeDate=new TypeToken<ArrayList<String>>(){}.getType();
-        dates=gson.fromJson(date,typeDate);
-        if(dates==null)
-        {
-            dates=new ArrayList<>();
-        }
-        Type typeTime=new TypeToken<ArrayList<String>>(){}.getType();
-        times=gson.fromJson(time,typeTime);
-        if(times==null)
-        {
-            times=new ArrayList<>();
-        }
-        Type typepath=new TypeToken<ArrayList<String>>(){}.getType();
-        finaluris=gson.fromJson(finaluri,typepath);
-        if(finaluris==null)
-        {
-            finaluris=new ArrayList<>();
-        }
 
     }
 
