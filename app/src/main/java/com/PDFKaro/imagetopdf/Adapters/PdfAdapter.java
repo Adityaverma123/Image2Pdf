@@ -34,17 +34,13 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.LinkedList;
 import java.util.List;
 
 public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
     Context context;
-//    List<String >names;
-//    List<String >uris;
-//    List<String>dates;
-//    List<String>times;
-//    List<String>finalUris;
-    List<PdfItem>items;
-    public PdfAdapter(Context context,List<PdfItem>items )
+    LinkedList<PdfItem> items;
+    public PdfAdapter(Context context,LinkedList<PdfItem>items )
     {
         this.items=items;
         this.context=context;

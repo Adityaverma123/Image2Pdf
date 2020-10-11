@@ -89,9 +89,6 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
     ConstraintLayout parent;
     ImageView add_image;
     Button cancel;
-    SharedPreferences sharedPreferences;
-    SharedPreferences.Editor editor;
-    ImageView backbtn;
     List<String>finalUri;
     @SuppressLint("HandlerLeak")
     private int fromPos = -1;
@@ -102,7 +99,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
     private static final int INTENT_REQUEST_GET_IMAGES = 13;
 
     public AddImageFragment() {
-        // Required empty public constructor
+
     }
 
 
@@ -121,8 +118,6 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
         add_image = view.findViewById(R.id.add_image);
         uris = new ArrayList<>();
         createPdf = view.findViewById(R.id.createPdfBtn);
-        sharedPreferences=context.getSharedPreferences("Home2List",Context.MODE_PRIVATE);
-        editor=sharedPreferences.edit();
         createPdf.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

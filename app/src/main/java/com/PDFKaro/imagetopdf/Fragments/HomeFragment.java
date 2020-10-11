@@ -27,6 +27,7 @@ import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,7 +38,7 @@ public class HomeFragment extends Fragment  {
     SharedPreferences.Editor editor;
     SharedPreferences sharedPreferences;
     PdfAdapter adapter;
-    List<PdfItem>items;
+    LinkedList<PdfItem>items;
     Context context;
     SwipeRefreshLayout refreshLayout;
     public HomeFragment() {
@@ -90,10 +91,10 @@ public class HomeFragment extends Fragment  {
 
             refreshLayout.setRefreshing(false);
             Log.i("name", name);
-            items.add(0,new PdfItem(name,getTime(),uri,getDate(),finalUri));
+            items.addFirst(new PdfItem(name,getTime(),uri,getDate(),finalUri));
             adapter.notifyItemInserted(items.size());
             saveData();
-            preferences.edit().clear().apply();
+
 
 
     }
@@ -131,11 +132,11 @@ public class HomeFragment extends Fragment  {
         SharedPreferences sharedPreferences=context.getSharedPreferences(Constants.SHARED_PREFS,Context.MODE_PRIVATE);
         Gson gson=new Gson();
         String json=sharedPreferences.getString("task_list",null);
-        Type type=new TypeToken<ArrayList<PdfItem>>(){}.getType();
+        Type type=new TypeToken<LinkedList<PdfItem>>(){}.getType();
         items=gson.fromJson(json,type);
         if(items==null)
         {
-            items=new ArrayList<>();
+            items=new LinkedList<>();
         }
 
 
