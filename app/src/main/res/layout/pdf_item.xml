@@ -37,6 +37,11 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/card_image"
             android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
             <TextView
 
                 android:id="@+id/list_name"
@@ -44,8 +49,16 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
+                android:layout_marginStart="2dp"
                 android:text="123456.pdf"
                 android:fontFamily="@font/caviar_dreams"/>
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="15dp"
+                android:src="@drawable/ic_edit"/>
+
+            </LinearLayout>
             <TextView
                 android:id="@+id/list_date"
                 android:layout_width="wrap_content"
