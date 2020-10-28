@@ -355,13 +355,6 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
     @SuppressLint("IntentReset")
     private void openGallery() {
-//        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-//        intent.setType("image/*");
-//        String[] mimetypes = {"image/jpg", "image/png", "image/jpeg"};
-//        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-//        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//        startActivityForResult(intent, Constants.OPENGALLERY);
         Matisse.from(this)
                 .choose(MimeType.ofImage(), false)
                 .countable(true)
@@ -369,15 +362,6 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
                 .capture(false)
                 .captureStrategy(new CaptureStrategy(true, "com.zhihu.matisse.sample.fileprovider","test"))
                 .maxSelectable(30)
-                .setOnSelectedListener(new OnSelectedListener() {
-                    @Override
-                    public void onSelected(@NonNull List<Uri> uriList, @NonNull List<String> pathList) {
-//                        Log.i("uriList",uriList.get(0).toString());
-//                        Log.i("pathList",pathList.get(0).toString());
-//                        uris.add(uriList.get(0));
-//                        adapter.notifyDataSetChanged();
-                    }
-                })
                 .imageEngine(new GlideEngine())
                 .forResult(Constants.OPENGALLERY);
 
@@ -538,26 +522,7 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
             startCrop(uri, Constants.CROP_CAMERA);
 
         } else if (requestCode == Constants.OPENGALLERY && resultCode == RESULT_OK) {
-//            ClipData clipData=data.getClipData();
-//            if(clipData!=null)
-//            {
-//                int count=clipData.getItemCount();
-//                for(int i=0;i<count;i++)
-//                {
-//                    Uri uri=clipData.getItemAt(i).getUri();
-//                    uris.add(uri);
-//                    finalUri.add(getPath(uri));
-//
-//                }
-//            }
-//            else {
-//                Uri uri=data.getData();
-//                finalUri.add(getPath(uri));
-//
-//                uris.add(uri);
-//            }
-//            Log.i("uris",uris.toString());
-//            adapter.notifyDataSetChanged();
+
             for (Uri uri : Matisse.obtainResult(data)) {
                 uris.add(uri);
             }
@@ -585,14 +550,6 @@ public class AddImageFragment extends Fragment implements Visibility, OnChangePi
 
             }
         }
-    }
-    private String getPath(Uri uri) {
-        String[]  data = { MediaStore.Images.Media.DATA };
-        CursorLoader loader = new CursorLoader(context, uri, data, null, null, null);
-        Cursor cursor = loader.loadInBackground();
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
     }
     @Override
     public void startCrop(Uri uri, int requestcode) {
