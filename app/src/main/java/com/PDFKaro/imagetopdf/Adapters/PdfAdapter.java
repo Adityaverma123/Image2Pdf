@@ -132,6 +132,13 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
 
             });
             holder.list_name.setText(items.get(position).getNames());
+            holder.edit_name.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder=new AlertDialog.Builder(context);
+                    View view=context.getLa
+                }
+            });
 
         File file = new File(items.get(position).getPath());
         if(file.exists()) {
@@ -143,10 +150,6 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             Glide.with(context).load(path).into(holder.list_image);
         }
         else Glide.with(context).load(items.get(position).getUri()).into(holder.list_image);
-
-
-        // Picasso.get().load(Uri.parse(uris.get(position))).fit().into(holder.list_image);
-           // holder.list_image.setImageURI(Uri.parse(uris.get(position)));
             holder.share.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -195,10 +198,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
             @Override
             public void run() {
                 deleteFile(items.get(position).getNames());
-//                names.remove(position);
-//                dates.remove(position);
-//                uris.remove(position);
-//                times.remove(position);
+
                 items.remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position,items.size());
@@ -209,16 +209,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 SharedPreferences.Editor editor=preferences.edit();
                 Gson gson=new Gson();
                 String json=gson.toJson(items);
-//                String image=gson.toJson(uris);
-//                String date=gson.toJson(dates);
-//                String time=gson.toJson(times);
-//                String path=gson.toJson(finalUris);
                 editor.putString("task_list",json);
-//                editor.putString("task_image",image);
-//                editor.putString("task_date",date);
-//                editor.putString("task_time",time);
-//                editor.putString("final_uri",path);
-
                 editor.apply();
                 notifyDataSetChanged();
             }
@@ -245,6 +236,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
         ImageView list_image;
         TextView list_date;
         TextView list_time;
+        ImageView edit_name;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -256,6 +248,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.ViewHolder> {
                 list_image=itemView.findViewById(R.id.list_image);
                 list_date=itemView.findViewById(R.id.list_date);
                 list_time=itemView.findViewById(R.id.list_time);
+                edit_name=itemView.findViewById(R.id.edit_name);
 
 
         }

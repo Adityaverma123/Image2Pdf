@@ -52,6 +52,7 @@
                 android:text="123456.pdf"
                 android:fontFamily="@font/caviar_dreams"/>
            <ImageView
+               android:id="@+id/edit_name"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
                android:src="@drawable/ic_edit"

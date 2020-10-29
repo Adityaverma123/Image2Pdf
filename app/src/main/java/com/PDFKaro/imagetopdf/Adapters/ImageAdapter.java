@@ -51,10 +51,8 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     {
         this.visibility=visibility;
         this.onItemClickListener=onItemClickListener;
-        this.cropUri=cropUri;
         this.context=context;
         this.uris=uris;
-        this.activity=activity;
         this.finalUri=finalUri;
     }
     @NonNull
@@ -67,8 +65,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        //holder.imageView.setImageURI(uris.get(position));
-       // Glide.with(context).load(uris.get(position)).into(holder.imageView);
+
         Picasso.get().load(uris.get(position)).fit().into(holder.imageView);
         holder.imageNo.setText("Image "+(position+1));
         holder.imageView.setOnClickListener(new View.OnClickListener() {
@@ -89,16 +86,6 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
         });
     }
 
-    private void startCrop(int position) {
-        setCropNo(position);
-      Intent intent= CropImage.activity(uris.get(position))
-                .setGuidelines(CropImageView.Guidelines.ON)
-                .getIntent(activity);
-      intent.putExtra("requestcode", Constants.CHANGE_NO);
-     activity.startActivityForResult(intent,Constants.CHANGE_NO);
-
-
-    }
     public interface OnItemClickListener {
         void onItemClicked(int position,View view);
     }
